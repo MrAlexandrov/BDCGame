@@ -1,0 +1,9 @@
+{
+  "admin": [
+    "blueprint_auth",
+    "blueprint_admin"
+  ],
+  "gamer": [
+    "blueprint_game"
+  ]
+}

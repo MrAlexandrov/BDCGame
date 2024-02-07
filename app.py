@@ -8,8 +8,12 @@ import os
 import asyncio
 
 from gevent.pywsgi import WSGIServer
-from flask import Flask, render_template
+from flask import Flask, render_template, redirect, url_for, json, session
 from flask_socketio import SocketIO
+from auth.route import blueprint_auth
+from admin.route import blueprint_admin
+from game.route import blueprint_game
+from access import login_required, group_required, external_required
 import qrcode
 from database.sql_provider import SQLProvider
 
@@ -51,17 +55,32 @@ print(question['image'])
 
 ########################################
 
-print(f"before app")
 
 app = Flask(__name__)
 socketio = SocketIO(app)
 
-print(f"after app")
+app.register_blueprint(blueprint_auth, url_prefix='/auth')
+app.register_blueprint(blueprint_admin, url_prefix='/admin')
+app.register_blueprint(blueprint_game, url_prefix='/game')
+# app.register_blueprint(blueprint_query, url_prefix='/query')
 
-@app.route('/')
+app.config['db_config'] = json.load(open('configs/db_config.json'))
+app.config['access_config'] = json.load(open('configs/access.json'))
+app.config['cache_config'] = json.load(open('configs/cache.json'))
+app.config['report_url'] = json.load(open('configs/report_url.json'))
+app.config['report_list'] = json.load(open('configs/report_list.json', encoding='UTF-8'))
+
+# Флаг, что игра не запущена
+app.config['work'] = False
+
+@app.route('/', methods=['GET', 'POST'])
+@login_required                     # Если пользователь не залогинен, откроется страница авторизации
 def index():
+    if session.get('user_group') == "admin":
+        return redirect(url_for('blueprint_admin.start_game'))
+    return redirect(url_for('blueprint_game.game'))
     # return render_template('index.html')
-    return render_template('question.html', question=question)
+    # return render_template('question.html', question=question)
 
 
 # @app.route('/question')
@@ -70,7 +89,6 @@ def index():
 
 
 if __name__ == '__main__':
-    # print('cum')
     # try:
     # port = os.environ['PORT']
     # print(f"port = {os.environ}")
