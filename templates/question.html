@@ -25,31 +25,63 @@
         <button type="submit">Submit Answer</button>
     </form>
 
-    <!-- Скрипт для обработки выбора ответа -->
-    <script>
-        // Функция для добавления обработчиков событий для кнопок с ответами
-        function addEventListeners() {
-            var buttons = document.querySelectorAll('.answerButton');
-            buttons.forEach(function(button) {
-                button.addEventListener('click', function() {
-                    toggleSelection(this);
+    <!--    &lt;!&ndash; Скрипт для обработки множественного выбора ответа &ndash;&gt;-->
+<!--    <script>-->
+<!--        // Функция для добавления обработчиков событий для кнопок с ответами-->
+<!--        function addEventListeners() {-->
+<!--            var buttons = document.querySelectorAll('.answerButton');-->
+<!--            buttons.forEach(function(button) {-->
+<!--                button.addEventListener('click', function() {-->
+<!--                    toggleSelection(this);-->
+<!--                });-->
+<!--            });-->
+<!--        }-->
+
+<!--        // Функция для изменения стиля кнопки при выборе/отмене выбора-->
+<!--        function toggleSelection(button) {-->
+<!--            button.classList.toggle('selected'); // Добавляем или убираем класс 'selected'-->
+<!--        }-->
+
+<!--        // Код для заполнения вопроса и вариантов ответов при загрузке страницы-->
+<!--        document.addEventListener('DOMContentLoaded', function() {-->
+<!--            // Вопрос и варианты ответов передаются из Flask в виде JSON-->
+<!--            var question = JSON.parse('{{ question | tojson | safe }}');-->
+
+<!--            // Добавляем обработчики событий для кнопок с ответами-->
+<!--            addEventListeners();-->
+<!--        });-->
+<!--    </script>-->
+        <script>
+            // Функция для добавления обработчиков событий для кнопок с ответами
+            function addEventListeners() {
+                var buttons = document.querySelectorAll('.answerButton');
+                buttons.forEach(function(button) {
+                    button.addEventListener('click', function() {
+                        // Отменяем выбор предыдущего ответа
+                        var selectedButtons = document.querySelectorAll('.answerButton.selected');
+                        selectedButtons.forEach(function(selectedButton) {
+                            selectedButton.classList.remove('selected');
+                        });
+
+                        // Выбираем новый ответ
+                        toggleSelection(this);
+                    });
                 });
+            }
+
+            // Функция для изменения стиля кнопки при выборе/отмене выбора
+            function toggleSelection(button) {
+                button.classList.toggle('selected'); // Добавляем или убираем класс 'selected'
+            }
+
+            // Код для заполнения вопроса и вариантов ответов при загрузке страницы
+            document.addEventListener('DOMContentLoaded', function() {
+                // Вопрос и варианты ответов передаются из Flask в виде JSON
+                var question = JSON.parse('{{ question | tojson | safe }}');
+
+                // Добавляем обработчики событий для кнопок с ответами
+                addEventListeners();
             });
-        }
-
-        // Функция для изменения стиля кнопки при выборе/отмене выбора
-        function toggleSelection(button) {
-            button.classList.toggle('selected'); // Добавляем или убираем класс 'selected'
-        }
-
-        // Код для заполнения вопроса и вариантов ответов при загрузке страницы
-        document.addEventListener('DOMContentLoaded', function() {
-            // Вопрос и варианты ответов передаются из Flask в виде JSON
-            var question = JSON.parse('{{ question | tojson | safe }}');
-
-            // Добавляем обработчики событий для кнопок с ответами
-            addEventListeners();
-        });
-    </script>
+        </script>
 </body>
 </html>

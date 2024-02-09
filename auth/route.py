@@ -33,12 +33,19 @@ def start_auth():
         print(f'provider = {provider}')
         sql_login = provider.get('login.sql', login=login, password=password)
         print(f'sql_login: {sql_login}')
-        user_info = select(current_app.config['db_config'], sql_login)
-        print(f'user_info {user_info}')
-        if len(user_info[0]) == 0:
+        user_info = select_dict(current_app.config['db_config'], sql_login)
+        if len(user_info) == 0:
             return render_template('login.html', message='Неверный логин или пароль')
         # return render_template('login.html', message=f'Вы вошли как {user_info[0][0][0]}')
-        return redirect()
+        user_dict = user_info[0]
+        print(f'user_dict {user_dict}')
+        print(f'user_info {user_info}')
+        print(user_dict['user_id'])
+        print(f'user_id {user_dict["user_id"]}, user_group {user_dict["user_group"]}')
+        session['user_id'] = user_dict['user_id']
+        session['user_group'] = user_dict['user_group']
+        session.permanent = True
+        return redirect(url_for('blueprint_admin.start_game'))
 
         # if login and password:
         #     # Получаем информацию о разных пользователях с таким логином и паролем.
