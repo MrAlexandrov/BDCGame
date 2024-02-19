@@ -23,5 +23,15 @@
     <div class="message">
         <p>Подождите, пока игра не начнется.</p>
     </div>
+    <script>
+        const socket = io(); // Подключение к серверу WebSocket
+
+        // Обработчик события start_game
+        socket.on('start_game', function(data) {
+            console.log('Game started:', data);
+            // Перенаправление пользователя на другую страницу
+            window.location.href = '/game'; // Замените на URL вашей страницы с игрой
+        });
+    </script>
 </body>
 </html>

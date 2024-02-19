@@ -5,57 +5,165 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quiz Question</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prefixfree/1.0.7/prefixfree.min.js"></script>
 </head>
 <body>
     <form id="quizForm">
         <!-- Вопрос -->
-        <quest id="question">{{ question['number'] }}. {{ question['question'] }}</quest>
+        <quest id="question"></quest>
         <!-- Изображение -->
         <img id="questionImage" src="{{ url_for('static', filename='images/' + question['image']) }}" alt="Question Image">
         <!-- Варианты ответов -->
         <div id="optionsContainer">
             <!-- Варианты ответов будут добавлены сюда динамически -->
-            {% for variant in question['variants'] %}
-                <div class="option">
-                    <button type="button" class="answerButton">{{ variant }}</button>
-                </div>
-            {% endfor %}
+<!--            {% for variant in question['variants'] %}-->
+            <div class="option">
+                <button type="button" class="answerButton">{{ variant }}</button>
+            </div>
+<!--            {% endfor %}-->
         </div>
-        <!-- Кнопка для отправки ответа -->
-        <button type="submit">Submit Answer</button>
     </form>
 
-        <script>
-            // Функция для добавления обработчиков событий для кнопок с ответами
-            function addEventListeners() {
-                var buttons = document.querySelectorAll('.answerButton');
-                buttons.forEach(function(button) {
-                    button.addEventListener('click', function() {
-                        // Отменяем выбор предыдущего ответа
-                        var selectedButtons = document.querySelectorAll('.answerButton.selected');
-                        selectedButtons.forEach(function(selectedButton) {
-                            selectedButton.classList.remove('selected');
-                        });
-
-                        // Выбираем новый ответ
-                        toggleSelection(this);
-                    });
-                });
-            }
-
-            // Функция для изменения стиля кнопки при выборе/отмене выбора
-            function toggleSelection(button) {
-                button.classList.toggle('selected'); // Добавляем или убираем класс 'selected'
-            }
-
-            // Код для заполнения вопроса и вариантов ответов при загрузке страницы
-            document.addEventListener('DOMContentLoaded', function() {
-                // Вопрос и варианты ответов передаются из Flask в виде JSON
-                var question = JSON.parse('{{ question | tojson | safe }}');
-
-                // Добавляем обработчики событий для кнопок с ответами
-                addEventListeners();
+    <script>
+    // Функция для добавления обработчиков событий для кнопок с ответами
+    function addEventListeners() {
+        var buttons = document.querySelectorAll('.answerButton');
+        buttons.forEach(function(button) {
+            button.addEventListener('click', function() {
+                toggleSelection(this);
             });
-        </script>
+        });
+    }
+
+    // Функция для изменения стиля кнопки при выборе/отмене выбора
+    function toggleSelection(button) {
+        button.classList.toggle('selected'); // Добавляем или убираем класс 'selected'
+    }
+
+    // Код для заполнения вопроса и вариантов ответов при загрузке страницы
+    document.addEventListener('DOMContentLoaded', function() {
+        // Вопрос и варианты ответов передаются из Flask в виде JSON
+        var question = JSON.parse('{{ question | tojson | safe }}');
+
+        // Добавляем обработчики событий для кнопок с ответами
+        addEventListeners();
+
+        // Добавляем обработчик события для отмены выбора кнопки
+        var selectedButton = document.querySelector('.selected');
+        if (selectedButton) {
+            selectedButton.addEventListener('click', function() {
+                toggleSelection(this);
+            });
+        }
+
+        // Добавьте другие необходимые действия для заполнения вопроса и вариантов ответов
+        displayQuestion(question);
+    });
+
+
+</script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.2.0/socket.io.js"></script>
+    <script>
+        const socket = io(); // Подключение к серверу WebSocket
+
+        socket.on('connect', function() {
+            console.log('Connected to WebSocket server');
+        });
+
+        // Обработчик для отправки информации о нажатых кнопках на сервер
+        function sendClickedButtons() {
+            console.log('sendClickedButtons')
+            var clickedButtons = []; // Массив для хранения информации о нажатых кнопках
+            document.querySelectorAll('.answerButton').forEach(button => {
+                if (button.classList.contains('selected')) {
+                    var buttonInfo = {
+                        id: button.id,
+                        text: button.innerText
+                    };
+                    clickedButtons.push(buttonInfo);
+                }
+            });
+            // Отправляем массив нажатых кнопок на сервер через WebSocket
+            console.log(clickedButtons)
+            socket.emit('clicked_buttons', { clickedButtons: clickedButtons });
+        }
+
+        // socket.on('show_results', function () {
+        //    console.log('Gamer results')
+        // });
+
+        // Обработчик для события 'new_question'
+        socket.on('new_question', function(data) {
+            console.log('New question')
+            sendClickedButtons()
+            displayQuestion(data.question); // Отображаем новый вопрос
+        });
+
+        // // Обработчик события 'start_game'
+        // socket.on('start_game', function(data) {
+        //     console.log('Start game')
+        //     console.log('Data')
+        //     console.log(data)
+        //     // Вызов функции для отображения вопроса
+        //     displayQuestion(data.question);
+        // });
+
+        function start_game() {
+            console.log('function start_game')
+            displayQuestion()
+        }
+
+        // Функция для отображения вопроса и вариантов ответов
+        function displayQuestion(question) {
+            document.getElementById('question').innerText = (question.number > 0 ? question.number + '. ' : '') + question.question; // Отображаем текст вопроса
+            document.getElementById('questionImage').src = '/static/images/' + question.image; // Устанавливаем изображение вопроса
+
+            // Очищаем контейнер для вариантов ответов
+            var optionsContainer = document.getElementById('optionsContainer');
+            optionsContainer.innerHTML = '';
+
+            var button_id = 0
+
+            // Добавляем варианты ответов в контейнер
+            question.variants.forEach(function(variant) {
+                var optionDiv = document.createElement('div');
+                optionDiv.className = 'option';
+
+                var button = document.createElement('button');
+                button.type = 'button';
+                button.id = button_id
+                button_id += 1
+                button.className = 'answerButton';
+                button.innerText = variant;
+
+                // Добавляем обработчик события для кнопки ответа
+                button.addEventListener('click', function() {
+                    var selectedButtons = document.querySelectorAll('.answerButton.selected');
+                    selectedButtons.forEach(function(selectedButton) {
+                        selectedButton.classList.remove('selected');
+                    });
+
+                    // Выбираем новый ответ
+                    toggleSelection(this);
+                });
+
+                optionDiv.appendChild(button);
+                optionsContainer.appendChild(optionDiv);
+            });
+        }
+
+        // Функция для изменения стиля кнопки при выборе/отмене выбора
+        // function toggleSelection(button) {
+        //     button.classList.toggle('selected');
+        // }
+
+        // // Функция для загрузки страницы с помощью javascript, вместо jinja
+        // document.addEventListener('DOMContentLoaded', function() {
+        //     // Получаем данные о вопросе из шаблона
+        //     var question = {{ question | tojson | safe }};
+        //     displayQuestion(question);
+        // });
+    </script>
 </body>
 </html>

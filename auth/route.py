@@ -7,9 +7,9 @@ from flask import (
     session, redirect, url_for
 )
 
-from db_work import select_dict
-from db_work import select
+from db_work import select_dict, select, insert
 from sql_provider import SQLProvider
+# from flask_login import current_user
 
 ##### СОЗДАНИЕ BLUEPRINT'а #####
 # 'admin' – имя Blueprint, которое будет суффиксом ко всем именам методов, данного модуля;
@@ -24,28 +24,94 @@ provider = SQLProvider(os.path.join(os.path.dirname(__file__), 'sql'))
 
 @blueprint_auth.route('/', methods=['GET', 'POST'])
 def start_auth():
+    if session.get('user_group') == 'admin':
+        print(f'User is admin')
+        current_app.config['admin_logged_in'] = True
+        return redirect(url_for('blueprint_admin.admin'))
+
     if request.method == 'GET':
-        return render_template('login.html', message='')
+        print(f'GET request')
+        if not current_app.config['admin_logged_in']:   # Если администратор не залогинен, нужно, чтобы тот появился
+            if session.get('user_group') == 'gamer':
+                return render_template('login.html', header='Пожалуйста, подождите, когда подключится администратор', admin=False, message='')
+            print(f'Admin is not logged in, render admin auth')
+            return render_template('login.html', header='Вход для администратора', admin=True, message='')
+        else:           # Администратор залогинен
+            if session.get('user_group') == 'admin':    # Если это сессия админа
+                print(f'Admin has logged in, and user is admin, redirect to admin page')
+                return redirect(url_for('blueprint_admin.admin'))
+            elif session.get('user_group') == 'gamer':
+                print(f'Admin has logged in, and user is gamer, redirect to gamer page')
+                return redirect(url_for('blueprint_game.game'))
+            else:
+                print(f'Admin has logged in, user has no group, render authorisation')
+                return render_template('login.html', header='Введите название команды', admin=False, message='')
     else:
+        print(f'POST request')
         login = request.form.get('login')
         password = request.form.get('password')
 
-        print(f'provider = {provider}')
-        sql_login = provider.get('login.sql', login=login, password=password)
-        print(f'sql_login: {sql_login}')
-        user_info = select_dict(current_app.config['db_config'], sql_login)
-        if len(user_info) == 0:
-            return render_template('login.html', message='Неверный логин или пароль')
-        # return render_template('login.html', message=f'Вы вошли как {user_info[0][0][0]}')
-        user_dict = user_info[0]
-        print(f'user_dict {user_dict}')
-        print(f'user_info {user_info}')
-        print(user_dict['user_id'])
-        print(f'user_id {user_dict["user_id"]}, user_group {user_dict["user_group"]}')
-        session['user_id'] = user_dict['user_id']
-        session['user_group'] = user_dict['user_group']
-        session.permanent = True
-        return redirect(url_for('blueprint_admin.start_game'))
+        if password:
+            print(f'Password is {password}, login is {login}')
+            sql_login = provider.get('login.sql', login=login, password=password)
+            user_info = select_dict(current_app.config['db_config'], sql_login)
+            if len(user_info) == 0:
+                # return render_template('login.html', message='Неверный логин или пароль')
+                return render_template('login.html', header='Вход для администратора', admin=True, message='')
+            user_dict = user_info[0]
+            session['user_id'] = user_dict['user_id']
+            session['user_group'] = user_dict['user_group']
+            session.permanent = True
+            current_app.config['admin_logged_in'] = True
+            return redirect(url_for('blueprint_admin.admin'))
+        else:
+            print(f'Password empty, it is gamer authorisation')
+            if session.get('user_group') == 'gamer':
+                return redirect(url_for('blueprint_game.game'))
+            sql_check_team = provider.get('check_team.sql', team_name=login)
+            print(f'Check team query = {sql_check_team}')
+            check_team = select(current_app.config['db_config'], sql_check_team)[0]
+            print(f'Query result = {check_team}')
+            if len(check_team) == 0:
+                print(f'No such team, creating such team login = {login}')
+                sql_new_team = provider.get('new_team.sql', team_name=login)
+                insert(current_app.config['db_config'], sql_new_team)
+                sql_get_id = provider.get('get_id.sql')
+                print(f'user_id will be = {select(current_app.config['db_config'], sql_get_id)[0][0][0]}')
+                session['user_id'] = select(current_app.config['db_config'], sql_get_id)[0][0][0]
+                session['user_group'] = 'gamer'
+                session['team_name'] = login
+                session.permanent = True
+                return redirect(url_for('blueprint_game.game'))
+            else:
+                print(f'Team already exist')
+                return render_template('login.html', header='Введите название команды', admin=False, message='Такая команда уже существует')
+
+
+
+
+    # if request.method == 'GET':
+    #     return render_template('login.html', message='')
+    # else:
+    #     login = request.form.get('login')
+    #     password = request.form.get('password')
+    #
+    #     print(f'provider = {provider}')
+    #     sql_login = provider.get('login.sql', login=login, password=password)
+    #     print(f'sql_login: {sql_login}')
+    #     user_info = select_dict(current_app.config['db_config'], sql_login)
+    #     if len(user_info) == 0:
+    #         return render_template('login.html', message='Неверный логин или пароль')
+    #     # return render_template('login.html', message=f'Вы вошли как {user_info[0][0][0]}')
+    #     user_dict = user_info[0]
+    #     print(f'user_dict {user_dict}')
+    #     print(f'user_info {user_info}')
+    #     print(user_dict['user_id'])
+    #     print(f'user_id {user_dict["user_id"]}, user_group {user_dict["user_group"]}')
+    #     session['user_id'] = user_dict['user_id']
+    #     session['user_group'] = user_dict['user_group']
+    #     session.permanent = True
+    #     return redirect(url_for('blueprint_admin.admin'))
 
         # if login and password:
         #     # Получаем информацию о разных пользователях с таким логином и паролем.

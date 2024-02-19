@@ -11,6 +11,9 @@ def login_required(func):
     def wrapper(*args, **kwargs):
         if 'user_id' in session:
             return func(*args, **kwargs)
+
+        if current_app.config['work']:
+            return redirect(url_for('blueprint_game.game'))
         return redirect(url_for('blueprint_auth.start_auth'))
     return wrapper
 

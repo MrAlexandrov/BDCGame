@@ -7,18 +7,18 @@
     <link href="/static/css/auth.css" type="text/css" rel="stylesheet">
 </head>
 <body>
-    <h1 class="h3 mb-3 text-center">Введите логин и пароль</h1>
+    <h1 class="h3 mb-3 text-center">{{ header }}</h1>
     <div>
         <form method="POST" action="">
             <label for="login">Логин</label>
             <input type="text" id="login" name="login" required>
 
+            {% if admin %}
             <label for="password">Пароль</label>
             <input type="password" name="password" id="password" required>
-
+            {% endif %}
             <input type="submit" class="submit" value="Отправить">
         </form>
-
         <h2>{{ message }}</h2>
     </div>
 </body>

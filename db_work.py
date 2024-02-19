@@ -40,12 +40,31 @@ def select_dict(db_config: dict, sql: str):
     return result
 
 
-def insert(db_config: dict, _sql: str):
+def insert(db_config: dict, sql: str):
     with DBContextManager(db_config) as cursor:
         if cursor is None:
             raise ValueError('Курсор не создан')
-        result = cursor.execute(_sql)
+        result = cursor.execute(sql)
     return result
+
+
+def update(db_config: dict, sql: str):
+    """
+    Выполняет запрос (UPDATE) к БД с указанным конфигом и запросом.
+    Args:
+        db_config: dict - Конфиг для подключения к БД.
+        sql: str - SQL-запрос.
+    Return:
+        Результат выполнения запроса.
+    """
+    with DBContextManager(db_config) as cursor:
+        if cursor is None:
+            raise ValueError('Курсор не создан')
+        cursor.execute(sql)
+        # Если нужно получить результат выполнения, можно использовать cursor.rowcount
+        # Пример: result = cursor.rowcount
+    return  # Если есть результат выполнения, его можно вернуть
+
 
 
 def call_proc(db_config: dict, proc_name: str, *args):

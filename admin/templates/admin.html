@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.2.0/socket.io.js"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+</head>
+<body>
+<!--    <h1>Admin Dashboard</h1>-->
+
+    <div id="gameControls">
+        <button id="loadPack">Загрузить пак</button>
+        <button id="startGameBtn">Начать игру</button>
+        <button id="nextQuestionBtn" style="display: none;">Следующий вопрос</button>
+<!--        <button id="prevQuestionBtn" style="display: none;">Следующий вопрос</button>-->
+        <button id="results">Показать результаты</button>
+        <button id="break">Перекур</button>
+        <a class="btn btn-primary btn-exit" href="/exit">Выход</a>
+    </div>
+
+    <script>
+        const socket = io(); // Подключение к серверу WebSocket
+
+        document.getElementById('startGameBtn').addEventListener('click', function() {
+            console.log('JS start button event');
+            socket.emit('start_game'); // Отправляем запрос на начало игры
+            socket.emit('start_game_admin'); // Отправляем запрос на начало игры
+        });
+
+        socket.on('startGameBtn', function (data) {
+            console.log('JS console log');
+            socket.emit('start_game'); // Отправляем запрос на начало игры
+            socket.emit('start_game_admin'); // Отправляем запрос на начало игры
+            document.getElementById('startGameBtn').style.display = 'none'; // Скрываем кнопку начала игры
+            document.getElementById('nextQuestionBtn').style.display = 'block'; // Показываем кнопку следующего вопроса
+        });
+        ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        document.getElementById('nextQuestionBtn').addEventListener('click', function () {
+           console.log('JS next question button event');
+           socket.emit('game_next_question');
+           socket.emit('admin_next_question');
+        });
+
+        // socket.on('loadPack', function ())
+
+
+        // document.getElementById('results').addEventListener('click', function () {
+        //    console.log('Button results')
+        //    socket.emit('show_results');
+        // });
+
+
+        // socket.on('emitTest', function (data) {
+        //     console.log('Data: ')
+        //     console.log(data)
+        // });
+
+    </script>
+</body>
+</html>
