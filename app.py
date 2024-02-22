@@ -45,22 +45,25 @@ app.config['report_list'] = json.load(open('configs/report_list.json', encoding=
 
 # Флаг, что игра не запущена
 app.config['work'] = False
-# app.config['number_question'] = 0
-# app.config['question'] = None
 app.config['admin_logged_in'] = False
 
-app.config['current_page'] = {
+app.config['begin'] = {
     'number': 0,
     'question': 'Подключайтесь к игре!',
     'image': '0.png',
+    'type': 'info',
     'variants': [],
     'table': []
 }
+
+app.config['number_question'] = 0
+app.config['current_page'] = app.config['begin']
 
 app.config['break'] = {
     'number': 0,
     'question': 'Перекур!',
     'image': 'break.jpg',
+    'type': 'info',
     'variants': [],
     'table': []
 }
@@ -69,6 +72,7 @@ app.config['results'] = question_data = {
         "number": 0,
         "question": "Результаты",
         "image": "results.jpg",
+        "type": "info",
         "variants": [],
         "table": [
             [("Команда 1", 10), ("Команда 2", 8), ("Команда 3", 6)],
@@ -173,35 +177,42 @@ df = get_exel()
 
 
 def get_question(index):
+    print('admin\\route: Admin get question')
     question = df.iloc[index][:3].to_dict()
     question['variants'] = df.iloc[index][3:].dropna().tolist()
+    question['type'] = 'single'
+    question['lock'] = False
     return question
 
 
-# print(f'question = {question}')
-#
-# print(question['image'])
+@socketio.on('load_pack')
+def load_pack():
+    questions = []
+    for i in range(len(df)):
+        questions.append(get_question(i))
+
+    app.config['questions'] = questions
+    print('admin\\route: questions', *app.config['questions'], sep='\n')
+    return questions
 
 
 app.config['number_question'] = 0
-app.config['question'] = get_question(app.config['number_question'])
-# print(f'question = {question}')
 
 ########################################
 
 
-@socketio.on('app_get_current_question')
-def get_current_question():
-    print(f'app\\route: app_get_current_question')
-    return app.config['question']
+# @socketio.on('app_get_current_question')
+# def get_current_question():
+#     print(f'app\\route: app_get_current_question')
+#     return app.config['current_page']
 
 
-@socketio.on('app_get_next_question')
-def get_next_question():
-    print(f'app\\route: app_get_next_question')
-    app.config['number_question'] += 1
-    app.config['question'] = get_question(app.config['number_question'])
-    return app.config['question']
+# @socketio.on('app_get_next_question')
+# def get_next_question():
+#     print(f'app\\route: app_get_next_question')
+#     app.config['number_question'] += 1
+#     app.config['question'] = get_question(app.config['number_question'])
+#     return app.config['question']
 
 # TODO: Сделать эту штуку
 # @socketio.on('startGame')

@@ -21,7 +21,6 @@ provider = SQLProvider(os.path.join(os.path.dirname(__file__), 'sql'))
 
 # current_app.register_blueprint(blueprint_admin, url_prefix='/admin')
 
-
 @blueprint_admin.route('/', methods=['GET', 'POST'])
 @login_required
 @group_required
@@ -33,46 +32,21 @@ def admin():
                            current_page=current_app.config['current_page'])
 
 
-def get_exel():
-    # Укажите путь к вашему файлу Excel
-    path_to_project = sys.argv[0]
-
-    index = path_to_project.rfind("\\")  # Находим индекс последнего слэша
-
-    # print(f'path_to_project[index + 1:] = {path_to_project[:index + 1]}')
-    path_to_project = path_to_project[:index + 1]
-    excel_path = path_to_project + 'JackBox.xlsx'
-    # print(f'excel_path = {excel_path}')
-
-    # Прочтите данные из файла Excel
-    df = pd.read_excel(excel_path)
-
-    return df
-
-
-df = get_exel()
-
-
-def get_question(index):
-    print('admin\\route: Admin get question')
-    question = df.iloc[index][:3].to_dict()
-    question['variants'] = df.iloc[index][3:].dropna().tolist()
-    return question
-
-
 def get_prev_question():
     print('admin\\route: Admin get previous question')
     if current_app.config['number_question'] > 1:
         current_app.config['number_question'] -= 1
-    current_app.config['question'] = get_question(current_app.config['number_question'])
+    # current_app.config['question'] = questions[current_app.config['number_question']]
     return current_app.config['question']
 
 
 def get_next_question():
     print('admin\\route: Admin get next question')
-    current_app.config['number_question'] += 1
-    current_app.config['question'] = get_question(current_app.config['number_question'])
-    return current_app.config['question']
+    print(f'admin\\route: len(current_app.config[\'questions\']) = {len(current_app.config['questions'])}')
+    if current_app.config['number_question'] < len(current_app.config['questions']) - 1:
+        current_app.config['number_question'] += 1
+    # current_app.config['question'] = questions[current_app.config['number_question']]
+    return current_app.config['questions'][current_app.config['number_question']]
 
 
 def register_admin_socketio_handlers(socketio):
@@ -82,41 +56,30 @@ def register_admin_socketio_handlers(socketio):
         print(f'admin\\route: Load Pack')
         return None
 
-    @socketio.on('start_game_admin')
-    def handle_start_game_admin():
-        print('admin\\route: start_game_admin')
-        current_app.config['work'] = True
-        emit('render_waiting_room_gamer')
-
     @socketio.on('admin_prev_question')
     def handle_prev_question_admin():
         print('admin\\route: Admin handle prev question')
-        print(f'admin\\route: Before current_app.config[\'number_question\'] {current_app.config["number_question"]}')
-        get_prev_question()
-        print(f'admin\\route: After current_app.config[\'number_question\'] {current_app.config["number_question"]}')
-        # Добавьте здесь логику для отображения следующего вопроса, например, запрос из базы данных
+        # Returns previous question
+        current_app.config['question'] = get_prev_question()
         current_app.config['current_page'] = current_app.config['question']
         emit('new_question', {'question': current_app.config['current_page']}, broadcast=True)
-        return current_app.config['question']
+        return current_app.config['questions'][current_app.config['number_question']]
 
     @socketio.on('admin_current_question')
     def handle_current_question_admin():
         print('admin\\route: Admin handle current question')
-        current_app.config['current_page'] = current_app.config['question']
+        current_app.config['current_page'] = current_app.config['questions'][current_app.config['number_question']]
         emit('new_question', {'question': current_app.config['current_page']}, broadcast=True)
-        return current_app.config['question']
+        return current_app.config['questions'][current_app.config['number_question']]
 
     @socketio.on('admin_next_question')
     def handle_next_question_admin():
         print('admin\\route: Admin handle next question')
-        print(f'admin\\route: Before current_app.config[\'number_question\'] {current_app.config["number_question"]}')
-        get_next_question()
-        print(f'admin\\route: After current_app.config[\'number_question\'] {current_app.config["number_question"]}')
-        # Добавьте здесь логику для отображения следующего вопроса, например, запрос из базы данных
+        current_app.config['question'] = get_next_question()
         current_app.config['current_page'] = current_app.config['question']
         # current_time = datetime.datetime.now()
         emit('new_question', {'question': current_app.config['current_page']}, broadcast=True)
-        return current_app.config['question']
+        return current_app.config['questions'][current_app.config['number_question']]
 
     @socketio.on('admin_break')
     def handle_break_admin():

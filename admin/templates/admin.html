@@ -14,7 +14,7 @@
 <body>
     <div id="gameControls">
         <button id="loadPackBtn">Загрузить пак</button>
-        <button id="startGameBtn">Начать игру</button>
+        <button id="startGameBtn" disabled>Начать игру</button>
         <div id="switchersQuestion">
             <button id="prevQuestionBtn" style="display: none;">Предыдущий вопрос</button>
             <button id="nextQuestionBtn" style="display: none;">Следующий вопрос</button>
@@ -54,8 +54,8 @@
         // TODO: добавить обработку исключений
         document.getElementById('loadPackBtn').addEventListener('click', function() {
             console.log('Load Pack Button clicked');
-            socket.emit('LoadPack');
-            // toggleSelection(this);
+            socket.emit('load_pack');
+            document.getElementById('startGameBtn').disabled = false;
             document.getElementById('loadPackBtn').disabled = true;
         });
 
@@ -85,8 +85,8 @@
            setTimeout(function() {
                console.log("admin_lock_buttons emitted");
                socket.emit('admin_lock_buttons');
-            // }, 60000); // 60 секунд * 1000 миллисекунд
-            }, 5000); // 60 секунд * 1000 миллисекунд
+            }, 60000); // 60 секунд * 1000 миллисекунд
+            // }, 5000); // 60 секунд * 1000 миллисекунд
         });
 
         document.getElementById('break').addEventListener('click', function () {

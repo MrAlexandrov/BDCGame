@@ -54,7 +54,6 @@ def register_game_socketio_handlers(socketio):
     @socketio.on('clicked_buttons')
     def clicked_buttons(data):
         print(f'game\\route: data = {data}')
-        # TODO: Решить баг, при о
         print(f'game\\route: session = {session}')
         print(f'game\\route: session[\'team_name\'] = {session['team_name']}')
         team_name = session['team_name']

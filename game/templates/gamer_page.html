@@ -21,11 +21,9 @@
             <!-- Варианты ответов -->
             <div id="optionsContainer">
                 <!-- Варианты ответов будут добавлены сюда динамически -->
-    <!--            {% for variant in question['variants'] %}-->
                 <div class="option">
                     <button type="button" class="answerButton">{{ variant }}</button>
                 </div>
-    <!--            {% endfor %}-->
             </div>
             <table id="dataTable">
                 <!-- Здесь будут отображаться данные из таблички -->
@@ -86,7 +84,7 @@
                 }
             });
             // Отправляем массив нажатых кнопок на сервер через WebSocket
-            console.log(clickedButtons)
+            console.log(clickedButtons);
             socket.emit('clicked_buttons', { clickedButtons: clickedButtons });
         }
 
@@ -111,47 +109,61 @@
         // }
 
         function displayQuestion(question) {
-            console.log('displayQuestion')
-            console.log(question)
+            console.log('displayQuestion');
+            console.log(question);
             // Отображаем текст вопроса
-            document.getElementById('question').innerText = (question.number > 0 ? question.number + '. ' : '') + question.question;
+            if (question.question) {
+                document.getElementById('question').innerText = (question.number > 0 ? question.number + '. ' : '') + question.question;
+            }
             // Устанавливаем изображение вопроса
-            document.getElementById('questionImage').src = '/static/images/' + question.image;
+            if (question.image) {
+                document.getElementById('questionImage').src = '/static/images/' + question.image;
+            }
 
             // Очищаем контейнер для вариантов ответов
             var optionsContainer = document.getElementById('optionsContainer');
             optionsContainer.innerHTML = '';
 
-            var button_id = 0
+            if (question.variants) {
+                if (question.type) {
+                    if (question.type === 'single' || question.type === 'multi') {
+                        var button_id = 0;
 
-            // Добавляем варианты ответов в контейнер
-            question.variants.forEach(function(variant) {
-                var optionDiv = document.createElement('div');
-                optionDiv.className = 'option';
+                        // Добавляем варианты ответов в контейнер
+                        question.variants.forEach(function (variant) {
+                            var optionDiv = document.createElement('div');
+                            optionDiv.className = 'option';
 
-                var button = document.createElement('button');
-                button.type = 'button';
-                button.id = button_id
-                button_id += 1
-                button.className = 'answerButton';
-                button.innerText = variant;
+                            var button = document.createElement('button');
+                            button.type = 'button';
+                            button.id = button_id
+                            button_id += 1
+                            button.className = 'answerButton';
+                            button.innerText = variant;
 
-                // Добавляем обработчик события для кнопки ответа
-                button.addEventListener('click', function() {
-                    if (!this.classList.contains('selected')) {
-                        var selectedButtons = document.querySelectorAll('.answerButton.selected');
-                        selectedButtons.forEach(function (selectedButton) {
-                            selectedButton.classList.remove('selected');
+                            // Добавляем обработчик события для кнопки ответа
+                            button.addEventListener('click', function () {
+                                if (question.type && question.type === 'single') {
+                                    if (!this.classList.contains('selected')) {
+                                        var selectedButtons = document.querySelectorAll('.answerButton.selected');
+                                        selectedButtons.forEach(function (selectedButton) {
+                                            selectedButton.classList.remove('selected');
+                                        });
+                                    }
+                                }
+
+                                // Выбираем новый ответ
+                                toggleSelection(this);
+                            });
+
+                            optionDiv.appendChild(button);
+                            optionsContainer.appendChild(optionDiv);
                         });
+                    } else if (question.type === 'text') {
+                        ///
                     }
-
-                    // Выбираем новый ответ
-                    toggleSelection(this);
-                });
-
-                optionDiv.appendChild(button);
-                optionsContainer.appendChild(optionDiv);
-            });
+                }
+            }
 
             // Отображаем табличку
             var dataTable = document.getElementById('dataTable');
