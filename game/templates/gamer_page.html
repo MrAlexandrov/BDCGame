@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Квизик</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prefixfree/1.0.7/prefixfree.min.js"></script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Ubuntu:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <form>
+        <div class="quizForm">
+            <!-- Вопрос -->
+            <quest id="question"></quest>
+            <!-- Изображение -->
+            <img id="questionImage" src="{{ url_for('static', filename='images/' + question['image']) }}" alt="Question Image">
+            <!-- Варианты ответов -->
+            <div id="optionsContainer">
+                <!-- Варианты ответов будут добавлены сюда динамически -->
+    <!--            {% for variant in question['variants'] %}-->
+                <div class="option">
+                    <button type="button" class="answerButton">{{ variant }}</button>
+                </div>
+    <!--            {% endfor %}-->
+            </div>
+            <table id="dataTable">
+                <!-- Здесь будут отображаться данные из таблички -->
+            </table>
+        </div>
+    </form>
+
+    <script>
+    // Функция для добавления обработчиков событий для кнопок с ответами
+    function addEventListeners() {
+        var buttons = document.querySelectorAll('.answerButton');
+        buttons.forEach(function(button) {
+            button.addEventListener('click', function() {
+                toggleSelection(this);
+            });
+        });
+    }
+
+    // Функция для изменения стиля кнопки при выборе/отмене выбора
+    function toggleSelection(button) {
+        button.classList.toggle('selected'); // Добавляем или убираем класс 'selected'
+    }
+
+    // Код для заполнения вопроса и вариантов ответов при загрузке страницы
+    document.addEventListener('DOMContentLoaded', function() {
+        // Вопрос и варианты ответов передаются из Flask в виде JSON
+        var question = JSON.parse('{{ question | tojson | safe }}');
+
+        // Добавляем обработчики событий для кнопок с ответами
+        addEventListeners();
+
+        // Добавьте другие необходимые действия для заполнения вопроса и вариантов ответов
+        displayQuestion(question);
+    });
+
+
+</script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.2.0/socket.io.js"></script>
+    <script>
+        const socket = io(); // Подключение к серверу WebSocket
+
+        socket.on('connect', function() {
+            console.log('Connected to WebSocket server');
+        });
+
+        // Обработчик для отправки информации о нажатых кнопках на сервер
+        function sendClickedButtons() {
+            console.log('sendClickedButtons')
+            var clickedButtons = []; // Массив для хранения информации о нажатых кнопках
+            document.querySelectorAll('.answerButton').forEach(button => {
+                if (button.classList.contains('selected')) {
+                    var buttonInfo = {
+                        id: button.id,
+                        text: button.innerText
+                    };
+                    clickedButtons.push(buttonInfo);
+                }
+            });
+            // Отправляем массив нажатых кнопок на сервер через WebSocket
+            console.log(clickedButtons)
+            socket.emit('clicked_buttons', { clickedButtons: clickedButtons });
+        }
+
+        // Обработчик для события 'new_question'
+        socket.on('new_question', function(data) {
+            console.log('New question');
+            // sendClickedButtons();
+            displayQuestion(data.question); // Отображаем новый вопрос
+        });
+
+        socket.on('lock_buttons', function(data) {
+            console.log('Lock buttons');
+            document.querySelectorAll('.answerButton').forEach(button => {
+                button.disabled = true;
+            });
+            sendClickedButtons();
+        });
+
+        // function start_game() {
+        //     console.log('function start_game');
+        //     displayQuestion();
+        // }
+
+        function displayQuestion(question) {
+            console.log('displayQuestion')
+            console.log(question)
+            // Отображаем текст вопроса
+            document.getElementById('question').innerText = (question.number > 0 ? question.number + '. ' : '') + question.question;
+            // Устанавливаем изображение вопроса
+            document.getElementById('questionImage').src = '/static/images/' + question.image;
+
+            // Очищаем контейнер для вариантов ответов
+            var optionsContainer = document.getElementById('optionsContainer');
+            optionsContainer.innerHTML = '';
+
+            var button_id = 0
+
+            // Добавляем варианты ответов в контейнер
+            question.variants.forEach(function(variant) {
+                var optionDiv = document.createElement('div');
+                optionDiv.className = 'option';
+
+                var button = document.createElement('button');
+                button.type = 'button';
+                button.id = button_id
+                button_id += 1
+                button.className = 'answerButton';
+                button.innerText = variant;
+
+                // Добавляем обработчик события для кнопки ответа
+                button.addEventListener('click', function() {
+                    if (!this.classList.contains('selected')) {
+                        var selectedButtons = document.querySelectorAll('.answerButton.selected');
+                        selectedButtons.forEach(function (selectedButton) {
+                            selectedButton.classList.remove('selected');
+                        });
+                    }
+
+                    // Выбираем новый ответ
+                    toggleSelection(this);
+                });
+
+                optionDiv.appendChild(button);
+                optionsContainer.appendChild(optionDiv);
+            });
+
+            // Отображаем табличку
+            var dataTable = document.getElementById('dataTable');
+            dataTable.innerHTML = ''; // Очищаем содержимое таблицы
+            // console.log('question.table = ')
+            // console.log(question.table)
+            if (question.table && question.table.length > 0 && question.table[0].length > 0) {
+                // console.log('in if')
+                // Создаем заголовки таблицы
+                var headerRow = dataTable.createTHead().insertRow(0);
+                question.table[1].forEach(function (columnName, index) {
+                    var headerCell = headerRow.insertCell(index);
+                    headerCell.textContent = columnName;
+                });
+
+                // Создаем tbody для строк данных
+                var bodyRows = document.createElement('tbody');
+                dataTable.appendChild(bodyRows);
+
+                // Добавляем строки данных в таблицу
+                question.table[0].forEach(function (rowData, rowIndex) {
+                    var dataRow = bodyRows.insertRow(); // Создаём новую строку
+
+                    // Добавляем номер строки
+                    var rowIndexCell = dataRow.insertCell(0);
+                    rowIndexCell.textContent = rowIndex + 1;
+
+                    // Добавляем название команды и счет
+                    rowData.forEach(function (cellData, cellIndex) {
+                        var dataCell = dataRow.insertCell(cellIndex + 1); // Создаём новую ячейку для текущей строки
+                        dataCell.textContent = cellData; // Так как в первом элементе внутреннего массива - это название команды
+                    });
+                });
+            }
+        }
+
+        socket.on('user_exit', function(data) {
+            console.log('user_exit');
+            socket.emit('gamer_exit');
+        });
+
+
+        // function loadNewPage(pageName) {
+        //     fetch('/', {
+        //         method: 'POST',
+        //         headers: {
+        //             'Content-Type': 'application/json'
+        //         },
+        //         body: JSON.stringify({ page: pageName })
+        //     })
+        //     .then(response => response.json())
+        //     .then(data => {
+        //         const newPage = data.page;
+        //         console.log('Loading new page:', newPage);
+        //         // Реализуйте здесь код для загрузки новой страницы или обновления содержимого страницы
+        //     })
+        //     .catch(error => {
+        //         console.error('Error:', error);
+        //     });
+        // }
+    </script>
+</body>
+</html>

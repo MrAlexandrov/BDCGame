@@ -46,7 +46,8 @@ def group_required(f):
         config = current_app.config['access_config']
         if group_validation(config):
             return f(*args, **kwargs)
-        return render_template('exceptions/internal_only.html')
+        # return render_template('static/exceptions/internal_only.html')
+        return redirect('/game')
     return wrapper
 
 

@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Waiting for Game to Start</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.2.0/socket.io.js"></script>
     <style>
         /* Простые стили для центрирования сообщения */
         body {
@@ -27,11 +28,11 @@
         const socket = io(); // Подключение к серверу WebSocket
 
         // Обработчик события start_game
-        socket.on('start_game', function(data) {
-            console.log('Game started:', data);
-            // Перенаправление пользователя на другую страницу
-            window.location.href = '/game'; // Замените на URL вашей страницы с игрой
-        });
+        // socket.on('start_game', function(data) {
+        //     console.log('Game started:', data);
+        //     // Перенаправление пользователя на другую страницу
+        //     window.location.href = '/game'; // Замените на URL вашей страницы с игрой
+        // });
     </script>
 </body>
 </html>
