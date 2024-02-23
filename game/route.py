@@ -51,34 +51,76 @@ def register_game_socketio_handlers(socketio):
     #     print('game\\route: start_game_gamer')
     #     # return redirect(url_for('/'))
 
+    def add_answer(answer):
+        print(f'game\\route: Add answer')
+        print(f'game\\route: answer = {answer}')
+        team_name = session['team_name']
+        question_number = current_app.config['number_question']
+        sql_add_answer = provider.get('add_answer.sql',
+                                      team_name=team_name,
+                                      question_number=question_number,
+                                      answer=answer)
+        insert(current_app.config['db_config'], sql_add_answer)
+        print(f'game\\route: End add answer')
+
+    @socketio.on('text_answer')
+    def text_answer(data):
+        print(f'game\\route: text_answer = {data}')
+        team_name = session['team_name']
+        if len(data) == 0:
+            return None
+        answer = data['text']
+        if len(answer) == 0:
+            return None
+        team_name = session['team_name']
+        question_number = current_app.config['number_question']
+        print(f'game\\route: team_name = {team_name}')
+        print(f'game\\route: id = {question_number}')
+        print(f'game\\route: answer = {answer}')
+        add_answer(answer)
+
+        if answer == current_app.config['right_answers'][question_number]:
+            sql_increase_score = provider.get('increase_score.sql', team_name=team_name)
+            update(current_app.config['db_config'], sql_increase_score)
+
     @socketio.on('clicked_buttons')
     def clicked_buttons(data):
         print(f'game\\route: data = {data}')
         print(f'game\\route: session = {session}')
         print(f'game\\route: session[\'team_name\'] = {session['team_name']}')
-        team_name = session['team_name']
-        if len(data['clickedButtons']) == 0:
+        if len(data['clickedButtons']) == 0 or len(data['clickedButtons'][0]) == 0:
             return None
-        button_number = data['clickedButtons'][0]['id']
+        print(f'game\\route: data[\'clickedButtons\'] = {data['clickedButtons']}')
+        team_name = session['team_name']
         question_number = current_app.config['number_question']
-        answer = data['clickedButtons'][0]['text']
-        print(f'game\\route: team_name = {team_name}')
-        print(f'game\\route: id = {question_number}')
-        print(f'game\\route: answer = {answer}')
-        if len(data['clickedButtons'][0]):
-            sql_add_answer = provider.get('add_answer.sql', team_name=team_name, question_number=question_number, answer=answer)
-            insert(current_app.config['db_config'], sql_add_answer)
-
-        sql_right_answer = provider.get('right_answer.sql', question_number=question_number)
-        print(f'game\\route: sql_right_answer = {sql_right_answer}')
-        check = select(current_app.config['db_config'], sql_right_answer)[0][0][0]
-        print(f'game\\route: check = {check}')
-        if answer == check:
+        list_answers = []
+        for i in range(len(data['clickedButtons'])):
+            answer = data['clickedButtons'][i]['text']
+            print(f'game\\route: answer = {answer}')
+            # # button_number = data['clickedButtons'][i]['id']
+            print(f'game\\route: team_name = {team_name}')
+            print(f'game\\route: id = {question_number}')
+            print(f'game\\route: answer = {answer}')
+            list_answers.append(answer)
+            add_answer(answer)
+        if sorted(list_answers) == current_app.config['right_answers'][question_number]:
             sql_increase_score = provider.get('increase_score.sql', team_name=team_name)
             print(f'game\\route: sql_increase_score = {sql_increase_score}')
             update(current_app.config['db_config'], sql_increase_score)
-        # print(f'data = {data}')
-        # print(f'session = {session}')
+            # sql_right_answer = provider.get('right_answer.sql', question_number=question_number)
+            # print(f'game\\route: sql_right_answer = {sql_right_answer}')
+            # temp = select(current_app.config['db_config'], sql_right_answer)
+            # print(f'game\\route: temp = {temp}')
+            # if len(temp[0]) == 0:
+            #     return None
+            # check = temp[0][0][0]
+            # print(f'game\\route: check = {check}')
+            # if answer == check:
+            #     sql_increase_score = provider.get('increase_score.sql', team_name=team_name)
+            #     print(f'game\\route: sql_increase_score = {sql_increase_score}')
+            #     update(current_app.config['db_config'], sql_increase_score)
+
+
 
     # Отправка нового вопроса всем клиентам
     @socketio.on('game_next_question')

@@ -180,7 +180,9 @@ def get_question(index):
     print('admin\\route: Admin get question')
     question = df.iloc[index][:3].to_dict()
     question['variants'] = df.iloc[index][3:].dropna().tolist()
-    question['type'] = 'single'
+    # question['type'] = 'single'
+    # question['type'] = 'text'
+    question['type'] = 'multi'
     question['lock'] = False
     return question
 
@@ -188,11 +190,34 @@ def get_question(index):
 @socketio.on('load_pack')
 def load_pack():
     questions = []
+    right_answers = []
     for i in range(len(df)):
-        questions.append(get_question(i))
+        current_question = get_question(i)
+        current_right_answers = []
+        if len(current_question['variants']) == 1:
+            current_question['type'] = 'text'
+            current_question['variants'][0] = current_question['variants'][0][1:]
+        else:
+            for j in range(len(current_question['variants'])):
+                ans = current_question['variants'][j]
+                if ans[0] == '!':
+                    current_question['variants'][j] = ans[1:]
+                    current_right_answers.append(current_question['variants'][j])
+            if len(current_right_answers) == 1:
+                current_question['type'] = 'single'
+            if len(current_right_answers) > 1:
+                current_right_answers.sort()
+                current_question['type'] = 'multi'
+        questions.append(current_question)
+        right_answers.append(current_right_answers)
 
     app.config['questions'] = questions
+    app.config['right_answers'] = right_answers
+    print('admin\\route:', '-' * 150)
     print('admin\\route: questions', *app.config['questions'], sep='\n')
+    print('admin\\route:', '-' * 150)
+    print('admin\\route: right_answers', *app.config['right_answers'], sep='\n')
+    print('admin\\route:', '-' * 150)
     return questions
 
 

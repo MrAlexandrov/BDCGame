@@ -37,13 +37,13 @@ def get_prev_question():
     if current_app.config['number_question'] > 1:
         current_app.config['number_question'] -= 1
     # current_app.config['question'] = questions[current_app.config['number_question']]
-    return current_app.config['question']
+    return current_app.config['questions'][current_app.config['number_question']]
 
 
 def get_next_question():
     print('admin\\route: Admin get next question')
     print(f'admin\\route: len(current_app.config[\'questions\']) = {len(current_app.config['questions'])}')
-    if current_app.config['number_question'] < len(current_app.config['questions']) - 1:
+    if current_app.config['number_question'] < (len(current_app.config['questions']) - 1):
         current_app.config['number_question'] += 1
     # current_app.config['question'] = questions[current_app.config['number_question']]
     return current_app.config['questions'][current_app.config['number_question']]
@@ -101,7 +101,9 @@ def register_admin_socketio_handlers(socketio):
     @socketio.on('admin_lock_buttons')
     def handle_lock_buttons_admin():
         print('admin\\route: lock buttons admin')
-        emit('lock_buttons', broadcast=True)
+        # emit('lock_buttons', broadcast=True)
+        emit('lock_buttons', {'type': current_app.config['question']['type']}, broadcast=True)
+        current_app.config['questions'][current_app.config['number_question']]['lock'] = True
 
     @socketio.on('admin_exit')
     def handle_admin_exit():

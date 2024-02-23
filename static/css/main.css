@@ -29,8 +29,6 @@ h1 {
     text-align: center;
 }
 
-
-
 .form-group label {
     display: block;
     color: white;
@@ -52,22 +50,20 @@ h1 {
     border-radius: 10px;
 }
 
-/*@media (max-width: 1000px) {*/
-/*    .form-group input,*/
-/*    .form-group button {*/
-/*        min-height: 160px;*/
-/*    }*/
-/*}*/
-
-/*input {*/
-/*    width: auto;*/
-/*    min-width: 400px;*/
-/*    height: auto;*/
-/*    min-height: 60px;*/
-/*    border: 2px solid white;*/
-/*    border-radius: 10px;*/
-/*    display: inline-block;*/
-/*}*/
+input {
+    font-size: 200%;
+    font-weight: bold;
+    width: 100%; /* Элементы занимают всю ширину контейнера */
+    padding: 8px;
+    box-sizing: border-box;
+    min-width: 300px;
+    max-width: 50vw;
+    height: auto;
+    margin: 4px auto 0;
+    min-height: 60px;
+    border: 2px solid white;
+    border-radius: 10px;
+}
 
 .quizForm {
     text-align: center; /* Выравнивание текста по центру */
@@ -220,6 +216,20 @@ button:disabled {
         /*min-height: 60px;*/
     }
 
+    input {
+        font-size: 200%;
+        font-weight: bold;
+        width: 100%; /* Элементы занимают всю ширину контейнера */
+        padding: 8px;
+        box-sizing: border-box;
+        min-width: 300px;
+        max-width: 100%;
+        height: auto;
+        margin: 4px auto 0;
+        min-height: 60px;
+        border: 2px solid white;
+        border-radius: 10px;
+    }
     /*#prevQuestionBtn {*/
     /*    margin-right: 10px;*/
     /*}*/

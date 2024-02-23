@@ -21,9 +21,9 @@
             <!-- Варианты ответов -->
             <div id="optionsContainer">
                 <!-- Варианты ответов будут добавлены сюда динамически -->
-                <div class="option">
-                    <button type="button" class="answerButton">{{ variant }}</button>
-                </div>
+<!--                <div class="option">-->
+<!--                    <button type="button" class="answerButton">{{ variant }}</button>-->
+<!--                </div>-->
             </div>
             <table id="dataTable">
                 <!-- Здесь будут отображаться данные из таблички -->
@@ -33,14 +33,14 @@
 
     <script>
     // Функция для добавления обработчиков событий для кнопок с ответами
-    function addEventListeners() {
-        var buttons = document.querySelectorAll('.answerButton');
-        buttons.forEach(function(button) {
-            button.addEventListener('click', function() {
-                toggleSelection(this);
-            });
-        });
-    }
+    // function addEventListeners() {
+    //     var buttons = document.querySelectorAll('.answerButton');
+    //     buttons.forEach(function(button) {
+    //         button.addEventListener('click', function() {
+    //             toggleSelection(this);
+    //         });
+    //     });
+    // }
 
     // Функция для изменения стиля кнопки при выборе/отмене выбора
     function toggleSelection(button) {
@@ -53,7 +53,7 @@
         var question = JSON.parse('{{ question | tojson | safe }}');
 
         // Добавляем обработчики событий для кнопок с ответами
-        addEventListeners();
+        // addEventListeners();
 
         // Добавьте другие необходимые действия для заполнения вопроса и вариантов ответов
         displayQuestion(question);
@@ -71,21 +71,29 @@
         });
 
         // Обработчик для отправки информации о нажатых кнопках на сервер
-        function sendClickedButtons() {
-            console.log('sendClickedButtons')
-            var clickedButtons = []; // Массив для хранения информации о нажатых кнопках
-            document.querySelectorAll('.answerButton').forEach(button => {
-                if (button.classList.contains('selected')) {
-                    var buttonInfo = {
-                        id: button.id,
-                        text: button.innerText
-                    };
-                    clickedButtons.push(buttonInfo);
-                }
-            });
-            // Отправляем массив нажатых кнопок на сервер через WebSocket
-            console.log(clickedButtons);
-            socket.emit('clicked_buttons', { clickedButtons: clickedButtons });
+        function sendClickedButtons(data) {
+            console.log('sendClickedButtons');
+            var questionType = data.type;
+            if (questionType === 'text') {
+                var inputValue = document.getElementById('inputText').value;
+                console.log('Введенный ответ:', inputValue);
+                socket.emit('text_answer', {text: inputValue});
+            } else {
+                var clickedButtons = []; // Массив для хранения информации о нажатых кнопках
+                document.querySelectorAll('.answerButton').forEach(button => {
+                    if (button.classList.contains('selected')) {
+                        var buttonInfo = {
+                            id: button.id,
+                            text: button.innerText,
+                        };
+                        clickedButtons.push(buttonInfo);
+                    }
+                });
+                // Отправляем массив нажатых кнопок на сервер через WebSocket
+                console.log('clickedButtons');
+                console.log(clickedButtons);
+                socket.emit('clicked_buttons', {clickedButtons: clickedButtons});
+            }
         }
 
         // Обработчик для события 'new_question'
@@ -97,16 +105,17 @@
 
         socket.on('lock_buttons', function(data) {
             console.log('Lock buttons');
-            document.querySelectorAll('.answerButton').forEach(button => {
-                button.disabled = true;
-            });
-            sendClickedButtons();
+            if (data.type === 'text') {
+                document.getElementById('inputText').disabled = true;
+                // document.getElementById('submitAnswer').disabled = true;
+            } else {
+                document.querySelectorAll('.answerButton').forEach(button => {
+                    button.disabled = true;
+                });
+            }
+            sendClickedButtons(data);
         });
 
-        // function start_game() {
-        //     console.log('function start_game');
-        //     displayQuestion();
-        // }
 
         function displayQuestion(question) {
             console.log('displayQuestion');
@@ -126,7 +135,37 @@
 
             if (question.variants) {
                 if (question.type) {
-                    if (question.type === 'single' || question.type === 'multi') {
+                    if (question.type === 'text') {
+                        var form = document.createElement('form');
+
+                        // Создаем поле ввода
+                        var inputField = document.createElement('input');
+                        inputField.type = 'text';
+                        inputField.name = 'textInput'; // Устанавливаем имя поля
+                        inputField.placeholder = 'Введите ответ'; // Устанавливаем подсказку
+                        inputField.id = 'inputText';
+                        inputField.disabled = question.lock;
+
+                        form.addEventListener('submit', function(event) {
+                            event.preventDefault(); // Предотвращаем отправку формы по умолчанию
+                        });
+
+                        // Создаем кнопку отправки формы
+                        //// var submitButton = document.createElement('button');
+                        //// submitButton.type = 'submit';
+                        //// submitButton.textContent = 'Отправить';
+                        //// submitButton.id = 'submitAnswer';
+
+                        // Добавляем поле ввода и кнопку в форму
+                        form.appendChild(inputField);
+                        //// form.appendChild(submitButton);
+
+                        // Получаем ссылку на контейнер
+                        var optionsContainer = document.getElementById('optionsContainer');
+
+                        // Добавляем форму в контейнер
+                        optionsContainer.appendChild(form);
+                    } else /*if (question.type === 'single' || question.type === 'multi')*/ {
                         var button_id = 0;
 
                         // Добавляем варианты ответов в контейнер
@@ -136,11 +175,12 @@
 
                             var button = document.createElement('button');
                             button.type = 'button';
-                            button.id = button_id
-                            button_id += 1
+                            button.id = button_id;
+                            button_id += 1;
                             button.className = 'answerButton';
                             button.innerText = variant;
 
+                            button.disabled = question.lock;
                             // Добавляем обработчик события для кнопки ответа
                             button.addEventListener('click', function () {
                                 if (question.type && question.type === 'single') {
@@ -159,8 +199,6 @@
                             optionDiv.appendChild(button);
                             optionsContainer.appendChild(optionDiv);
                         });
-                    } else if (question.type === 'text') {
-                        ///
                     }
                 }
             }
