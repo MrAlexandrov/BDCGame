@@ -54,10 +54,10 @@ def register_game_socketio_handlers(socketio):
     def add_answer(answer):
         print(f'game\\route: Add answer')
         print(f'game\\route: answer = {answer}')
-        team_name = session['team_name']
+        user_id = session['user_id']
         question_number = current_app.config['number_question']
         sql_add_answer = provider.get('add_answer.sql',
-                                      team_name=team_name,
+                                      user_id=user_id,
                                       question_number=question_number,
                                       answer=answer)
         insert(current_app.config['db_config'], sql_add_answer)
@@ -73,6 +73,7 @@ def register_game_socketio_handlers(socketio):
         if len(answer) == 0:
             return None
         team_name = session['team_name']
+        user_id = session['user_id']
         question_number = current_app.config['number_question']
         print(f'game\\route: team_name = {team_name}')
         print(f'game\\route: id = {question_number}')
@@ -80,7 +81,7 @@ def register_game_socketio_handlers(socketio):
         add_answer(answer)
 
         if answer == current_app.config['right_answers'][question_number]:
-            sql_increase_score = provider.get('increase_score.sql', team_name=team_name)
+            sql_increase_score = provider.get('increase_score.sql', user_id=user_id)
             update(current_app.config['db_config'], sql_increase_score)
 
     @socketio.on('clicked_buttons')

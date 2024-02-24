@@ -1,2 +1,2 @@
-insert into answers (team_name, question_number, answer)
-values ('$team_name', '$question_number', '$answer')
+insert into answers (user_id, question_number, answer)
+values ('$user_id', '$question_number', '$answer')

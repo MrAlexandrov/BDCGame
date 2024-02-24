@@ -77,7 +77,8 @@ def start_auth():
                 print(f'auth\\route: No such team, creating such team login = {login}')
                 sql_new_team = provider.get('new_team.sql', team_name=login)
                 insert(current_app.config['db_config'], sql_new_team)
-                sql_get_id = provider.get('get_id.sql')
+                sql_get_id = provider.get('get_id.sql', team_name=login)
+                print(f'auth\\route: sql_get_id = {sql_get_id}')
                 print(f'auth\\route: user_id will be = {select(current_app.config['db_config'], sql_get_id)[0][0][0]}')
                 session['user_id'] = select(current_app.config['db_config'], sql_get_id)[0][0][0]
                 session['user_group'] = 'gamer'
