@@ -120,7 +120,7 @@ def make_qr():
     local_ip = get_local_ip()
     if local_ip:
         print("app\\route: Local IP Address:", local_ip)
-        qr_data = f"{local_ip}:5000"
+        qr_data = f"http://{local_ip}:5000"
         generate_qr_code(qr_data, "static/images/0.png")
         return local_ip
     else:
@@ -177,7 +177,7 @@ df = get_exel()
 
 
 def get_question(index):
-    print('admin\\route: Admin get question')
+    print('app\\route: Admin get question')
     question = df.iloc[index][:3].to_dict()
     question['variants'] = df.iloc[index][3:].dropna().tolist()
     # question['type'] = 'single'
