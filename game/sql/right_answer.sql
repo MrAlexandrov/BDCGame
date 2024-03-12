@@ -1,3 +1,3 @@
 select answer
-from right_answers
+from jackbox.right_answers
 where question_id='$question_number'

@@ -253,6 +253,7 @@ def page_not_found(e):
     # Здесь можно возвращать специальную страницу для ошибки 404
     return redirect(url_for('blueprint_auth.start_auth'))
 
+
 if __name__ == '__main__':
     # try:
     # port = os.environ['PORT']
