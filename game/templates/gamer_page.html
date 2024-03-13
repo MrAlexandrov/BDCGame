@@ -115,6 +115,30 @@
             sendClickedButtons(data);
         });
 
+        socket.on('show_right_answers', function(data) {
+            console.log('show_right_answers');
+            console.log('data:');
+            console.log(data);
+            console.log('right_answer');
+            console.log(right_answer);
+            if (data.type === 'text') {
+                var right_answer = data.right_answer;
+                var inputField = document.getElementById('inputText');
+                inputField.value = '';
+                inputField.placeholder = right_answer;
+                inputField.style.backgroundColor = '#00FF00';
+                // document.getElementById('inputText').disabled = true;
+                // document.getElementById('submitAnswer').disabled = true;
+            } else {
+                var right_answer = data.right_answer[0];
+                document.querySelectorAll('.answerButton').forEach(button => {
+                    console.log(button.innerText);
+                    if (button.innerText === right_answer) {
+                        button.style.backgroundColor = '#00FF00';
+                    }
+                });
+            }
+        });
 
         function displayQuestion(question) {
             console.log('displayQuestion');
@@ -142,6 +166,11 @@
                         inputField.type = 'text';
                         inputField.name = 'textInput'; // Устанавливаем имя поля
                         inputField.placeholder = 'Введите ответ'; // Устанавливаем подсказку
+                        if (question.lock) {
+                            inputField.style.backgroundColor = '#00FF00';
+                            inputField.placeholder = question.answer[0];
+                            inputField.value = '';
+                        }
                         inputField.id = 'inputText';
                         inputField.disabled = question.lock;
 
@@ -178,6 +207,9 @@
                             button_id += 1;
                             button.className = 'answerButton';
                             button.innerText = variant;
+                            if (question.lock && variant === question.answer[0]) {
+                                button.style.backgroundColor = '#00FF00';
+                            }
 
                             button.disabled = question.lock;
                             // Добавляем обработчик события для кнопки ответа

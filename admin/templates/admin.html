@@ -17,6 +17,8 @@
         <div id="switchersQuestion">
             <button id="prevQuestionBtn" style="display: none;">Предыдущий вопрос</button>
             <button id="nextQuestionBtn" style="display: none;">Следующий вопрос</button>
+            <button id="lockButtons" style="display: none;">Заблокировать кнопки</button>
+            <button id="rightAnswers" style="display: none;">Показать ответ</button>
         </div>
         <button id="results">Показать результаты</button>
         <button id="break">Перекур</button>
@@ -26,6 +28,8 @@
     <script>
         const socket = io(); // Подключение к серверу WebSocket
 
+        var question_number = 0;
+        var showing_question = 0;
         // Код для заполнения вопроса и вариантов ответов при загрузке страницы
         document.addEventListener('DOMContentLoaded', function() {
             var game_started = JSON.parse('{{ game_started | tojson | safe }}');
@@ -42,6 +46,9 @@
                 if (current_page.image === 'break.jpg') {
                     document.getElementById('break').classList.add('selected');
                 }
+            } else {
+                question_number = 0;
+                showing_question = 0;
             }
 
             // Добавляем обработчики событий для кнопок с ответами
@@ -73,6 +80,9 @@
            console.log('Previous Question Button clicked');
            document.getElementById('results').classList.remove('selected');
            document.getElementById('break').classList.remove('selected');
+           if (showing_question > 1) {
+               showing_question -= 1;
+           }
            socket.emit('admin_prev_question');
         });
 
@@ -81,11 +91,39 @@
            document.getElementById('results').classList.remove('selected');
            document.getElementById('break').classList.remove('selected');
            socket.emit('admin_next_question');
-           setTimeout(function() {
-               console.log("admin_lock_buttons emitted");
-               socket.emit('admin_lock_buttons');
-            // }, 60000); // 60 секунд * 1000 миллисекунд
-            }, 5000); // 60 секунд * 1000 миллисекунд
+           if (question_number - showing_question === 0) {
+               question_number += 1;
+               showing_question += 1;
+               document.getElementById('nextQuestionBtn').style.display = 'none';
+               document.getElementById('prevQuestionBtn').disabled = true;
+               document.getElementById('break').disabled = true;
+               document.getElementById('results').disabled = true;
+               document.getElementById('lockButtons').style.display = 'inline-block';
+           } else {
+               showing_question += 1;
+           }
+           // setTimeout(function() {
+           //     console.log("admin_lock_buttons emitted");
+           //     socket.emit('admin_lock_buttons');
+           //  // }, 60000); // 60 секунд * 1000 миллисекунд
+           //  }, 5000); // 60 секунд * 1000 миллисекунд
+        });
+
+        document.getElementById('lockButtons').addEventListener('click', function () {
+           console.log('Lock buttons clicked');
+           socket.emit('admin_lock_buttons');
+           document.getElementById('lockButtons').style.display = 'none';
+           document.getElementById('rightAnswers').style.display = 'inline-block';
+        });
+        // TODO: Изменить эту логику так, чтобы после перелистывания из предыдущих вопросов не требовало блокировки кнопок и отображения ответа
+        document.getElementById('rightAnswers').addEventListener('click', function () {
+           console.log('Right answers clicked');
+           socket.emit('admin_show_right_answers');
+           document.getElementById('rightAnswers').style.display = 'none';
+           document.getElementById('prevQuestionBtn').disabled = false;
+           document.getElementById('break').disabled = false;
+           document.getElementById('results').disabled = false;
+           document.getElementById('nextQuestionBtn').style.display = 'inline-block';
         });
 
         document.getElementById('break').addEventListener('click', function () {

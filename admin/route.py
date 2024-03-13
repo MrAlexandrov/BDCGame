@@ -14,7 +14,6 @@ from flask_socketio import emit
 import pandas as pd
 import datetime
 
-
 blueprint_admin = Blueprint('blueprint_admin', __name__, template_folder='templates')
 provider = SQLProvider(os.path.join(os.path.dirname(__file__), 'sql'))
 
@@ -50,7 +49,7 @@ def get_next_question():
 
 
 def register_admin_socketio_handlers(socketio):
-# Логика WebSocket для начала игры и следующего вопроса
+    # Логика WebSocket для начала игры и следующего вопроса
     @socketio.on('LoadPack')
     def handle_load_pack():
         print(f'admin\\route: Load Pack')
@@ -100,17 +99,29 @@ def register_admin_socketio_handlers(socketio):
 
     @socketio.on('admin_lock_buttons')
     def handle_lock_buttons_admin():
+        # TODO: перенести это в app.py
         print('admin\\route: lock buttons admin')
         # emit('lock_buttons', broadcast=True)
+        question_number = current_app.config['number_question']
         emit('lock_buttons', {'type': current_app.config['question']['type']}, broadcast=True)
-        current_app.config['questions'][current_app.config['number_question']]['lock'] = True
+        current_app.config['questions'][question_number]['lock'] = True
+
+    @socketio.on('admin_show_right_answers')
+    def handle_show_right_answers():
+        # TODO: это тоже перенести в app.py
+        print(f'admin\\route: handle right answers')
+        question_number = current_app.config['number_question']
+        print(f'current_app.config[\'right_answers\'][question_number]: {current_app.config['right_answers'][question_number]}')
+        emit('show_right_answers', {'type': current_app.config['question']['type'],
+                                                'right_answer': current_app.config['right_answers'][question_number]},
+                                                broadcast=True)
 
     @socketio.on('admin_exit')
     def handle_admin_exit():
         print(f'admin\\route: handle admin exit')
         emit('user_exit', broadcast=True)
 
-# Обработчик для WebSocket соединения
+    # Обработчик для WebSocket соединения
     @socketio.on('connect')
     def handle_connect():
         print('admin\\route: admin connected')

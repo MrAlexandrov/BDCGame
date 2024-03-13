@@ -54,6 +54,7 @@ def register_game_socketio_handlers(socketio):
     def add_answer(answer):
         print(f'game\\route: Add answer')
         print(f'game\\route: answer = {answer}')
+        # answer=str(answer)
         user_id = session['user_id']
         question_number = current_app.config['number_question']
         sql_add_answer = provider.get('add_answer.sql',
@@ -137,6 +138,9 @@ def register_game_socketio_handlers(socketio):
         print(f'game\\route: handle next question current_app.config[\'question\'] = {current_app.config["question"]}')
         # emit('next_question', {'question': current_app.config['question']}, broadcast=True)
         # return render_template('gamer_page.html', question=current_app.config['question'])
+
+
+
 
     @socketio.on('gamer_exit')
     def handle_gamer_exit():

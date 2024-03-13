@@ -53,6 +53,7 @@ app.config['begin'] = {
     'image': '0.png',
     'type': 'info',
     'variants': [],
+    'lock': False,
     'table': []
 }
 
@@ -184,6 +185,7 @@ def get_question(index):
     # question['type'] = 'text'
     question['type'] = 'multi'
     question['lock'] = False
+    question['answer'] = []
     return question
 
 
@@ -196,13 +198,16 @@ def load_pack():
         current_right_answers = []
         if len(current_question['variants']) == 1:
             current_question['type'] = 'text'
-            current_question['variants'][0] = current_question['variants'][0][1:]
+            current_question['answer'].append(current_question['variants'])
+            current_right_answers.append(current_question['variants'][0])
+            # current_question['variants'][0] = current_question['variants'][0][1:]
         else:
             for j in range(len(current_question['variants'])):
                 ans = current_question['variants'][j]
                 if ans[0] == '!':
                     current_question['variants'][j] = ans[1:]
                     current_right_answers.append(current_question['variants'][j])
+                    current_question['answer'].append(current_question['variants'][j])
             if len(current_right_answers) == 1:
                 current_question['type'] = 'single'
             if len(current_right_answers) > 1:

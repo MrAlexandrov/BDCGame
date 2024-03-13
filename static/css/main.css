@@ -260,6 +260,10 @@ button:disabled {
     background: white;
 }
 
+/*.right-answer {*/
+/*    background: #00FF00;*/
+/*}*/
+
 /* Table */
 #dataTable {
     color: white;
