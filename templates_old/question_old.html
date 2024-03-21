@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Question Template</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .container {
+            text-align: center;
+            padding: 20px;
+            border-radius: 8px;
+            background-color: #fff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        img {
+            max-width: 100%;
+            margin-bottom: 20px;
+        }
+        .answer-button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px;
+            transition: background-color 0.3s ease;
+        }
+        .answer-button:hover {
+            background-color: #45a049;
+        }
+        .selected {
+            background-color: #008CBA !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>{{ question }}</h2>
+        <img src="{{ image_url }}" alt="Question Image">
+        <div id="answers">
+            {% for answer in answers %}
+                <button class="answer-button" onclick="selectAnswer(this)">{{ answer }}</button>
+            {% endfor %}
+        </div>
+    </div>
+
+    <script>
+        function selectAnswer(button) {
+            // Проверяем, была ли кнопка уже выбрана
+            var isSelected = button.classList.contains('selected');
+
+            // Убираем класс 'selected' со всех кнопок
+            var buttons = document.querySelectorAll('.answer-button');
+            buttons.forEach(function(btn) {
+                btn.classList.remove('selected');
+            });
+
+            // Если кнопка не была выбрана, то выделяем ее
+            if (!isSelected) {
+                button.classList.add('selected');
+            }
+        }
+
+    </script>
+</body>
+</html>

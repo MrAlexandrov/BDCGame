@@ -1,0 +1,355 @@
+/* Стили для формы */
+body {
+    font-family: "Ubuntu", sans-serif;
+    background: #232323;
+    height: 700px;
+    margin-bottom: 0;
+    margin-top: 0;
+}
+h1 {
+    color: white;
+    text-align: center;
+    min-width: 320px;
+    /*max-width: 720px;*/
+    font-size: 400%;
+    margin: 0 auto;
+}
+
+.auth {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    width: 100%;
+}
+.form-group {
+    width: 720px; /* Ширина контейнера */
+    margin-top: 10px; /* Отступ между элементами */
+    text-align: center;
+}
+
+.form-group label {
+    display: block;
+    color: white;
+    font-size: 200%;
+    margin-bottom: 5px;
+}
+
+.form-group input,
+.form-group button {
+    font-size: 400%;
+    font-weight: bold;
+    width: 100%; /* Элементы занимают всю ширину контейнера */
+    padding: 8px;
+    box-sizing: border-box;
+    min-width: 400px;
+    height: auto;
+    min-height: 160px;
+    border: 2px solid white;
+    border-radius: 10px;
+}
+
+input {
+    font-size: 200%;
+    font-weight: bold;
+    width: 100%; /* Элементы занимают всю ширину контейнера */
+    padding: 8px;
+    box-sizing: border-box;
+    min-width: 300px;
+    max-width: 50vw;
+    height: auto;
+    margin: 4px auto 0;
+    min-height: 60px;
+    border: 2px solid white;
+    border-radius: 10px;
+}
+
+.quizForm {
+    text-align: center; /* Выравнивание текста по центру */
+    max-width: 720px;
+    margin: 4px auto 0px;
+    align-items: center;
+    justify-content: center;
+}
+
+quest {
+    color: white;
+    text-align: center;
+    /*display: flex;*/
+    max-width: 100%;
+    height: 8vh;
+    font-size: 24px;
+    /*max-font-size: 60px;*/
+    max-font-size: 240px;
+    font-weight: bold;
+    margin-top: 8px;
+}
+/* Стили для изображения */
+img {
+    /*max-height: 340px;*/
+    max-height: 48vh;
+    max-width: 100%;
+    height: auto;
+    margin: 4px auto 0;
+    display: flex;
+    /*box-shadow: 0 0 10px 5px white; !* Горизонтальное смещение | Вертикальное смещение | Размытие | Размер *!*/
+    border-radius: 10px; /* Радиус скругления углов */
+}
+#optionsContainer {
+    max-height: 40vh;
+}
+.option {
+    /*max-height: 70px;*/
+}
+button {
+    width: 100%;
+    min-width: 300px;
+    max-width: 50vw;
+    height: auto;
+    min-height: 60px;
+    padding: 8px;
+    margin-top: 8px;
+    box-sizing: border-box;
+    border: 2px solid white;
+    border-radius: 5px; /* Радиус скругления углов */
+
+    --bs-btn-padding-x: 0.75rem;
+    --bs-btn-padding-y: 0.375rem;
+    --bs-btn-font-family: ;
+    --bs-btn-font-size: 1rem;
+    --bs-btn-font-weight: 400;
+    --bs-btn-line-height: 1.5;
+    --bs-btn-color: black;
+    --bs-btn-bg: transparent;
+    --bs-btn-border-width: 2px;
+    --bs-btn-border-color: white;
+    --bs-btn-border-radius: 0.375rem;
+    --bs-btn-hover-border-color: transparent;
+    --bs-btn-box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15),0 1px 1px rgba(0, 0, 0, 0.075);
+    --bs-btn-disabled-opacity: 0.65;
+    --bs-btn-focus-box-shadow: 0 0 0 0.25rem rgba(var(--bs-btn-focus-shadow-rgb), .5);
+    display: inline-block;
+    padding: var(--bs-btn-padding-y) var(--bs-btn-padding-x);
+    font-family: var(--bs-btn-font-family);
+    font-size: var(--bs-btn-font-size);
+    font-weight: var(--bs-btn-font-weight);
+    line-height: var(--bs-btn-line-height);
+    color: var(--bs-btn-color);
+    text-align: center;
+    text-decoration: none;
+    vertical-align: middle;
+    cursor: pointer;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    user-select: none;
+    border: var(--bs-btn-border-width) solid var(--bs-btn-border-color);
+    border-radius: var(--bs-btn-border-radius);
+    background-color: var(--bs-btn-bg);
+
+    --bs-btn-color: #fff;
+    --bs-btn-bg: rgba(0, 0, 0, 0.5);
+    --bs-btn-border-color: white;
+    --bs-btn-hover-color: #fff;
+    --bs-btn-hover-bg: #0b5ed7;
+    --bs-btn-hover-border-color: #0a58ca;
+    --bs-btn-focus-shadow-rgb: 49,132,253;
+    --bs-btn-active-color: #fff;
+    --bs-btn-active-bg: #0a58ca;
+    --bs-btn-active-border-color: #0a53be;
+    --bs-btn-active-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
+    --bs-btn-disabled-color: #fff;
+    --bs-btn-disabled-bg: #0d6efd;
+    --bs-btn-disabled-border-color: #0d6efd;
+}
+button:disabled {
+    background-color: gray; /* Цвет выбранной кнопки */
+    opacity: 50%;
+}
+
+#gameControls {
+    display: flex;
+    flex-direction: column;
+    max-width: 50vw;
+    margin: 0 auto;
+}
+
+#gameControls button {
+    min-width: 0;
+}
+
+#switchersQuestion button {
+    display: inline-block;
+    width: calc(50% - 7px);
+    /*height: 45%;*/
+    /*min-height: 60px;*/
+}
+
+#prevQuestionBtn {
+    margin-right: 10px;
+}
+
+/* Стили для кнопок */
+.option {
+    margin-top: auto;
+}
+
+@media screen and (max-width: 600px) {
+    button {
+        max-width: 100%;
+    }
+    #gameControls {
+        display: flex;
+        flex-direction: column;
+        max-width: 100%;
+        margin: 0 auto;
+    }
+
+    #gameControls button {
+        min-width: 0;
+    }
+
+    #switchersQuestion button {
+        display: inline-block;
+        width: 100%;
+        /*height: 45%;*/
+        /*min-height: 60px;*/
+    }
+
+    input {
+        font-size: 200%;
+        font-weight: bold;
+        width: 100%; /* Элементы занимают всю ширину контейнера */
+        padding: 8px;
+        box-sizing: border-box;
+        min-width: 300px;
+        max-width: 100%;
+        height: auto;
+        margin: 4px auto 0;
+        min-height: 60px;
+        border: 2px solid white;
+        border-radius: 10px;
+    }
+    /*#prevQuestionBtn {*/
+    /*    margin-right: 10px;*/
+    /*}*/
+}
+
+.answerButton {
+    /*background-color: #0000FF; !* Зеленый цвет фона *!*/
+    /*color: white; !* Белый цвет текста *!*/
+    /*padding: 10px 20px; !* Отступы внутри кнопки *!*/
+    /*border: none; !* Удаление границы кнопки *!*/
+    /*text-align: center; !* Выравнивание текста по центру *!*/
+    /*text-decoration: none; !* Удаление подчеркивания *!*/
+    /*display: inline-block;*/
+    font-size: 200%;
+    /*!*font-size: calc(8px + 2vmin);*!*/
+    font-weight: bold;
+    /*margin: 4px 2px;*/
+    /*cursor: pointer; !* Изменение курсора при наведении *!*/
+    border-radius: 10px; /* Скругление углов кнопки */
+    width: 100%;
+    /*height: 4rem;*/
+}
+
+.selected {
+    /*background-color: gray; !* Цвет выбранной кнопки *!*/
+    /*opacity: 50%;*/
+    color: black;
+    background: white;
+}
+
+/*.right-answer {*/
+/*    background: #00FF00;*/
+/*}*/
+
+/* Table */
+#dataTable {
+    color: white;
+	width: 100%;
+	border: none;
+	margin-bottom: 20px;
+    font-weight: bold;
+    font-size: 100%;
+}
+#dataTable thead th {
+	font-weight: bold;
+	text-align: center;
+	border: none;
+	padding: 10px 15px;
+	background: #d8d8d8;
+	/*font-size: 14px;*/
+}
+#dataTable thead tr th:first-child {
+	border-radius: 8px 0 0 8px;
+}
+#dataTable thead tr th:last-child {
+	border-radius: 0 8px 8px 0;
+}
+#dataTable tbody td {
+	text-align: center;
+	border: none;
+	padding: 10px 15px;
+	/*font-size: 14px;*/
+	vertical-align: top;
+}
+/*#dataTable tbody tr:nth-child(even){*/
+#dataTable tbody tr {
+	background: gray;
+}
+#dataTable tbody tr td:first-child {
+	border-radius: 8px 0 0 8px;
+}
+#dataTable tbody tr td:last-child {
+	border-radius: 0 8px 8px 0;
+}
+/* Table */
+
+.ubuntu-light {
+  font-family: "Ubuntu", sans-serif;
+  font-weight: 300;
+  font-style: normal;
+}
+
+.ubuntu-regular {
+  font-family: "Ubuntu", sans-serif;
+  font-weight: 400;
+  font-style: normal;
+}
+
+.ubuntu-medium {
+  font-family: "Ubuntu", sans-serif;
+  font-weight: 500;
+  font-style: normal;
+}
+
+.ubuntu-bold {
+  font-family: "Ubuntu", sans-serif;
+  font-weight: 700;
+  font-style: normal;
+}
+
+.ubuntu-light-italic {
+  font-family: "Ubuntu", sans-serif;
+  font-weight: 300;
+  font-style: italic;
+}
+
+.ubuntu-regular-italic {
+  font-family: "Ubuntu", sans-serif;
+  font-weight: 400;
+  font-style: italic;
+}
+
+.ubuntu-medium-italic {
+  font-family: "Ubuntu", sans-serif;
+  font-weight: 500;
+  font-style: italic;
+}
+
+.ubuntu-bold-italic {
+  font-family: "Ubuntu", sans-serif;
+  font-weight: 700;
+  font-style: italic;
+}

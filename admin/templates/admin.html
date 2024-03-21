@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Панель администратора</title>
+    <script src="https://cdn.socket.io/4.7.4/socket.io.min.js" integrity="sha384-Gr6Lu2Ajx28mzwyVR8CFkULdCU7kMlZ9UthllibdOSo6qAiN+yXNHqtgdTvFXMT4" crossorigin="anonymous"></script>    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Ubuntu:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="gameControls">
+        <button id="loadPackBtn">Загрузить пак</button>
+        <button id="startGameBtn" disabled>Начать игру</button>
+        <div id="switchersQuestion">
+            <button id="prevQuestionBtn" style="display: none;">Предыдущий вопрос</button>
+            <button id="nextQuestionBtn" style="display: none;">Следующий вопрос</button>
+            <button id="lockButtons" style="display: none;">Заблокировать кнопки</button>
+            <button id="rightAnswers" style="display: none;">Показать ответ</button>
+        </div>
+        <button id="results">Показать результаты</button>
+        <button id="break">Перекур</button>
+        <button id="exit">Выход</button>
+    </div>
+
+    <script>
+        const socket = io(); // Подключение к серверу WebSocket
+
+        var question_number = 0;
+        var showing_question = 0;
+        // Код для заполнения вопроса и вариантов ответов при загрузке страницы
+        document.addEventListener('DOMContentLoaded', function() {
+            var game_started = JSON.parse('{{ game_started | tojson | safe }}');
+            var current_page = JSON.parse('{{ current_page | tojson | safe }}');
+            if (game_started) {
+                document.getElementById('startGameBtn').style.display = 'none'; // Скрываем кнопку начала игры
+                document.getElementById('nextQuestionBtn').style.display = 'inline-block'; // Показываем кнопку следующего вопроса
+                document.getElementById('prevQuestionBtn').style.display = 'inline-block'; // Показываем кнопку предыдущего вопроса
+            }
+            if (!(current_page.number > 0)) {
+                if (current_page.image === 'results.jpg') {
+                    document.getElementById('results').classList.add('selected');
+                }
+                if (current_page.image === 'break.jpg') {
+                    document.getElementById('break').classList.add('selected');
+                }
+            } else {
+                question_number = 0;
+                showing_question = 0;
+            }
+
+            // Добавляем обработчики событий для кнопок с ответами
+            addEventListeners();
+
+        });
+
+        // Добавления скрытия кнопки загрузки пака, после его загрузки
+        // TODO: добавить обработку исключений
+        document.getElementById('loadPackBtn').addEventListener('click', function() {
+            console.log('Load Pack Button clicked');
+            socket.emit('load_pack');
+            document.getElementById('startGameBtn').disabled = false;
+            document.getElementById('loadPackBtn').disabled = true;
+        });
+
+        document.getElementById('startGameBtn').addEventListener('click', function() {
+            console.log('Start Button clicked');
+            // socket.emit('startGame');
+            socket.emit('start_game_admin');
+            // socket.emit('start_game_gamer');
+            document.getElementById('startGameBtn').style.display = 'none'; // Скрываем кнопку начала игры
+            document.getElementById('nextQuestionBtn').style.display = 'inline-block'; // Показываем кнопку следующего вопроса
+            document.getElementById('prevQuestionBtn').style.display = 'inline-block'; // Показываем кнопку предыдущего вопроса
+            // document.getElementById('nextQuestionBtn').style.float = 'right';
+        });
+
+        document.getElementById('prevQuestionBtn').addEventListener('click', function () {
+           console.log('Previous Question Button clicked');
+           document.getElementById('results').classList.remove('selected');
+           document.getElementById('break').classList.remove('selected');
+           if (showing_question > 1) {
+               showing_question -= 1;
+           }
+           socket.emit('admin_prev_question');
+        });
+
+        document.getElementById('nextQuestionBtn').addEventListener('click', function () {
+           console.log('Next Question Button clicked');
+           document.getElementById('results').classList.remove('selected');
+           document.getElementById('break').classList.remove('selected');
+           socket.emit('admin_next_question');
+           if (question_number - showing_question === 0) {
+               question_number += 1;
+               showing_question += 1;
+               document.getElementById('nextQuestionBtn').style.display = 'none';
+               document.getElementById('prevQuestionBtn').disabled = true;
+               document.getElementById('break').disabled = true;
+               document.getElementById('results').disabled = true;
+               document.getElementById('lockButtons').style.display = 'inline-block';
+           } else {
+               showing_question += 1;
+           }
+           // setTimeout(function() {
+           //     console.log("admin_lock_buttons emitted");
+           //     socket.emit('admin_lock_buttons');
+           //  // }, 60000); // 60 секунд * 1000 миллисекунд
+           //  }, 5000); // 60 секунд * 1000 миллисекунд
+        });
+
+        document.getElementById('lockButtons').addEventListener('click', function () {
+           console.log('Lock buttons clicked');
+           socket.emit('admin_lock_buttons');
+           document.getElementById('lockButtons').style.display = 'none';
+           document.getElementById('rightAnswers').style.display = 'inline-block';
+        });
+        // TODO: Изменить эту логику так, чтобы после перелистывания из предыдущих вопросов не требовало блокировки кнопок и отображения ответа
+        document.getElementById('rightAnswers').addEventListener('click', function () {
+           console.log('Right answers clicked');
+           socket.emit('admin_show_right_answers');
+           document.getElementById('rightAnswers').style.display = 'none';
+           document.getElementById('prevQuestionBtn').disabled = false;
+           document.getElementById('break').disabled = false;
+           document.getElementById('results').disabled = false;
+           document.getElementById('nextQuestionBtn').style.display = 'inline-block';
+        });
+
+        document.getElementById('break').addEventListener('click', function () {
+           console.log('Break Button clicked');
+           if (this.classList.contains('selected')) {
+               socket.emit('admin_current_question');
+           } else {
+               document.getElementById('results').classList.remove('selected');
+               socket.emit('admin_break');
+           }
+           toggleSelection(this);
+        });
+
+        document.getElementById('results').addEventListener('click', function () {
+           console.log('Results Button clicked');
+           if (this.classList.contains('selected')) {
+               socket.emit('admin_current_question');
+           } else {
+               document.getElementById('break').classList.remove('selected');
+               socket.emit('admin_results');
+           }
+           toggleSelection(this);
+        });
+
+        document.getElementById('exit').addEventListener('click', function () {
+           console.log('Exit');
+           socket.emit('admin_exit');
+        });
+
+        function toggleSelection(button) {
+            console.log('selection toggled');
+            button.classList.toggle('selected'); // Добавляем или убираем класс 'selected'
+        }
+    </script>
+</body>
+</html>

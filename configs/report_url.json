@@ -1,0 +1,12 @@
+ {
+    "1": {
+        "create_rep":"blueprint_report.create_rep1",
+        "view_rep": "blueprint_report.view_rep1",
+        "delete_rep": "blueprint_report.delete_rep1"
+    },
+    "2": {
+        "create_rep":"blueprint_report.create_rep2",
+        "view_rep": "blueprint_report.view_rep2",
+        "delete_rep": "blueprint_report.delete_rep2"
+    }
+}

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Question</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+</head>
+<body>
+    <form id="quizForm">
+        <!-- Вопрос -->
+        <quest id="question">{{ question['number'] }}. {{ question['question'] }}</quest>
+        <!-- Изображение -->
+        <img id="questionImage" src="{{ url_for('static', filename='images/' + question['image']) }}" alt="Question Image">
+        <!-- Варианты ответов -->
+        <div id="optionsContainer">
+            <!-- Варианты ответов будут добавлены сюда динамически -->
+            {% for variant in question['variants'] %}
+                <div class="option">
+                    <button type="button" class="answerButton">{{ variant }}</button>
+                </div>
+            {% endfor %}
+        </div>
+        <!-- Кнопка для отправки ответа -->
+        <button type="submit">Submit Answer</button>
+    </form>
+
+    <!-- Скрипт для обработки множественного выбора ответа -->
+    <script>
+        // Функция для добавления обработчиков событий для кнопок с ответами
+        function addEventListeners() {
+            var buttons = document.querySelectorAll('.answerButton');
+            buttons.forEach(function(button) {
+                button.addEventListener('click', function() {
+                    toggleSelection(this);
+                });
+            });
+        }
+
+        // Функция для изменения стиля кнопки при выборе/отмене выбора
+        function toggleSelection(button) {
+            button.classList.toggle('selected'); // Добавляем или убираем класс 'selected'
+        }
+
+        // Код для заполнения вопроса и вариантов ответов при загрузке страницы
+        document.addEventListener('DOMContentLoaded', function() {
+            // Вопрос и варианты ответов передаются из Flask в виде JSON
+            var question = JSON.parse('{{ question | tojson | safe }}');
+
+            // Добавляем обработчики событий для кнопок с ответами
+            addEventListeners();
+        });
+    </script>
+</body>
+</html>
