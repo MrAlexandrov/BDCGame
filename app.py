@@ -134,7 +134,7 @@ make_qr()
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
-    # session.clear()
+    session.clear()
     current_user = session.get('user_group')
     if current_user:
         print(f'app\\route: User is logged in')
@@ -165,7 +165,7 @@ def get_exel():
 
     # print(f'path_to_project[index + 1:] = {path_to_project[:index + 1]}')
     path_to_project = path_to_project[:index + 1]
-    excel_path = path_to_project + 'JackBox.xlsx'
+    excel_path = path_to_project + 'JackBox_piter.xlsx'
     # print(f'excel_path = {excel_path}')
 
     # Прочтите данные из файла Excel

@@ -6,3 +6,5 @@ PyMySQL~=1.1.0
 numpy~=1.26.4
 openpyxl
 gevent-websocket
+
+Flask-Cors~=4.0.0
