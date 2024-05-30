@@ -1,0 +1,85 @@
+Index: game/sql/add_answer.sql
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>insert into answers (user_id, question_number, answer)\r\nvalues ('$user_id', '$question_number', '$answer')
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/game/sql/add_answer.sql b/game/sql/add_answer.sql
+--- a/game/sql/add_answer.sql	
++++ b/game/sql/add_answer.sql	
+@@ -1,2 +1,2 @@
+-insert into answers (user_id, question_number, answer)
++insert into jackbox.answers (user_id, question_number, answer)
+ values ('$user_id', '$question_number', '$answer')
+\ No newline at end of file
+Index: test2.css
+===================================================================
+diff --git a/test2.css b/test2.css
+new file mode 100644
+--- /dev/null	
++++ b/test2.css	
+@@ -0,0 +1,62 @@
++.countdown {
++  display: grid;
++  margin: 1em auto;
++  width: 20em;
++  height: 20em;
++}
++.countdown::after {
++  grid-column: 1;
++  grid-row: 1;
++  place-self: center;
++  font: 5em/2 ubuntu mono, consolas, monaco, monospace;
++  animation: num 60s steps(1) infinite;
++  content: "0:" counter(s, decimal-leading-zero);
++}
++
++@keyframes num {
++  0% {
++    counter-reset: s 60;
++  }
++  100% {
++    counter-reset: s 0;
++  }
++}
++svg {
++  grid-column: 1;
++  grid-row: 1;
++}
++
++[r] {
++  fill: none;
++  stroke: silver;
++}
++[r] + [r] {
++  transform: rotate(-90deg);
++  stroke-linecap: round;
++  stroke: #8A9B0F;
++  animation: arc 60s linear infinite;
++  animation-name: arc, col;
++}
++
++@keyframes arc {
++  0% {
++    stroke-dashoffset: 0px;
++  }
++}
++@keyframes col {
++  0% {
++    stroke: #8A9B0F;
++  }
++  25% {
++    stroke: #F8CA00;
++  }
++  50% {
++    stroke: #E97F02;
++  }
++  75% {
++    stroke: #BD1550;
++  }
++  100% {
++    stroke: #490A3D;
++  }
++}
+\ No newline at end of file

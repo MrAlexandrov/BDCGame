@@ -41,7 +41,7 @@ def get_prev_question():
 
 def get_next_question():
     print('admin\\route: Admin get next question')
-    print(f'admin\\route: len(current_app.config[\'questions\']) = {len(current_app.config['questions'])}')
+    print(f"admin\\route: len(current_app.config['questions']) = {len(current_app.config['questions'])}")
     if current_app.config['number_question'] < (len(current_app.config['questions']) - 1):
         current_app.config['number_question'] += 1
     # current_app.config['question'] = questions[current_app.config['number_question']]
@@ -111,7 +111,7 @@ def register_admin_socketio_handlers(socketio):
         # TODO: это тоже перенести в app.py
         print(f'admin\\route: handle right answers')
         question_number = current_app.config['number_question']
-        print(f'current_app.config[\'right_answers\'][question_number]: {current_app.config['right_answers'][question_number]}')
+        print(f"current_app.config['right_answers'][question_number]: {current_app.config['right_answers'][question_number]}")
         emit('show_right_answers', {'type': current_app.config['question']['type'],
                                                 'right_answer': current_app.config['right_answers'][question_number]},
                                                 broadcast=True)

@@ -34,26 +34,26 @@ def start_auth():
         if not current_app.config['admin_logged_in']:   # Если администратор не залогинен, нужно, чтобы тот появился
             if session.get('user_group') == 'gamer':
                 return render_template('login.html', header='Пожалуйста, подождите, когда подключится администратор', admin=False, message='')
-            print(f'auth\\route: Admin is not logged in, render admin auth')
+            print(f"auth\\route: Admin is not logged in, render admin auth")
             return render_template('login.html', header='Вход для администратора', admin=True, message='')
         else:           # Администратор залогинен
             if session.get('user_group') == 'admin':    # Если это сессия админа
-                print(f'auth\\route: Admin has logged in, and user is admin, redirect to admin page')
+                print(f"auth\\route: Admin has logged in, and user is admin, redirect to admin page")
                 return redirect(url_for('blueprint_admin.admin'))
             elif session.get('user_group') == 'gamer':
-                print(f'auth\\route: session = {session}')
-                print(f'auth\\route: Admin has logged in, and user is gamer, redirect to gamer page')
+                print(f"auth\\route: session = {session}")
+                print(f"auth\\route: Admin has logged in, and user is gamer, redirect to gamer page")
                 return redirect(url_for('blueprint_game.game'))
             else:
-                print(f'auth\\route: Admin has logged in, user has no group, render authorisation')
+                print(f"auth\\route: Admin has logged in, user has no group, render authorisation")
                 return render_template('login.html', header='Введите название команды', admin=False, message='')
     else:
-        print(f'auth\\route: POST request')
+        print(f"auth\\route: POST request")
         login = request.form.get('login')
         password = request.form.get('password')
 
         if password:
-            print(f'auth\\route: Password is {password}, login is {login}')
+            print(f"auth\\route: Password is {password}, login is {login}")
             sql_login = provider.get('login.sql', login=login, password=password)
             user_info = select_dict(current_app.config['db_config'], sql_login)
             if len(user_info) == 0:
@@ -66,29 +66,29 @@ def start_auth():
             current_app.config['admin_logged_in'] = True
             return redirect(url_for('blueprint_admin.admin'))
         else:
-            print(f'auth\\route: Password empty, it is gamer authorisation')
+            print(f"auth\\route: Password empty, it is gamer authorisation")
             if session.get('user_group') == 'gamer':
                 return redirect(url_for('blueprint_game.game'))
             sql_check_team = provider.get('check_team.sql', team_name=login)
-            print(f'auth\\route: Check team query = {sql_check_team}')
+            print(f"auth\\route: Check team query = {sql_check_team}")
             check_team = select(current_app.config['db_config'], sql_check_team)[0]
-            print(f'auth\\route: Query result = {check_team}')
+            print(f"auth\\route: Query result = {check_team}")
             if len(check_team) == 0:
-                print(f'auth\\route: No such team, creating such team login = {login}')
+                print(f"auth\\route: No such team, creating such team login = {login}")
                 sql_new_team = provider.get('new_team.sql', team_name=login)
                 insert(current_app.config['db_config'], sql_new_team)
                 sql_get_id = provider.get('get_id.sql', team_name=login)
                 print(f'auth\\route: sql_get_id = {sql_get_id}')
-                print(f'auth\\route: user_id will be = {select(current_app.config['db_config'], sql_get_id)[0][0][0]}')
+                print(f"auth\\route: user_id will be = {select(current_app.config['db_config'], sql_get_id)[0][0][0]}")
                 session['user_id'] = select(current_app.config['db_config'], sql_get_id)[0][0][0]
                 session['user_group'] = 'gamer'
                 session['team_name'] = login
                 session.permanent = False
-                print(f'auth\\route: session = {session}')
-                print(f'auth\\route: session[\'team_name\'] = {session['team_name']}')
+                print(f"auth\\route: session = {session}")
+                print(f"auth\\route: session['team_name'] = {session['team_name']}")
                 return redirect(url_for('blueprint_game.game'))
             else:
-                print(f'auth\\route: Team already exist')
+                print(f"auth\\route: Team already exist")
                 return render_template('login.html', header='Введите название команды', admin=False, message='Такая команда уже существует')
 
 

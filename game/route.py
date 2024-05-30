@@ -90,10 +90,10 @@ def register_game_socketio_handlers(socketio):
         print(f'game\\route: data = {data}')
         print(f'game\\route: session = {session}')
         # print(f'game\\route: session[\'team_name\'] = {session['team_name']}')
-        print(f'game\\route: session[\'user_id\'] = {session['user_id']}')
+        print(f"game\\route: session['user_id'] = {session['user_id']}")
         if len(data['clickedButtons']) == 0 or len(data['clickedButtons'][0]) == 0:
             return None
-        print(f'game\\route: data[\'clickedButtons\'] = {data['clickedButtons']}')
+        print(f"game\\route: data['clickedButtons'] = {data['clickedButtons']}")
         # team_name = session['team_name']
         user_id = session['user_id']
         question_number = current_app.config['number_question']
@@ -129,13 +129,13 @@ def register_game_socketio_handlers(socketio):
     # Отправка нового вопроса всем клиентам
     @socketio.on('game_next_question')
     def handle_next_question():
-        print(f'game\\route: handle next question current_app.config[\'question\'] = {current_app.config["question"]}')
+        print(f"game\\route: handle next question current_app.config['question'] = {current_app.config['question']}")
         # emit('next_question', {'question': current_app.config['question']}, broadcast=True)
         # return render_template('gamer_page.html', question=current_app.config['question'])
 
     @socketio.on('game_prev_question')
     def handle_prev_question():
-        print(f'game\\route: handle next question current_app.config[\'question\'] = {current_app.config["question"]}')
+        print(f"game\\route: handle next question current_app.config['question'] = {current_app.config['question']}")
         # emit('next_question', {'question': current_app.config['question']}, broadcast=True)
         # return render_template('gamer_page.html', question=current_app.config['question'])
 
