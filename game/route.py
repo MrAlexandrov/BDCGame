@@ -90,10 +90,10 @@ def register_game_socketio_handlers(socketio):
         print(f'game\\route: data = {data}')
         print(f'game\\route: session = {session}')
         # print(f'game\\route: session[\'team_name\'] = {session['team_name']}')
-        print(f'game\\route: session[\'user_id\'] = {session['user_id']}')
+        print(f"game\\route: session[\'user_id\'] = {session['user_id']}")
         if len(data['clickedButtons']) == 0 or len(data['clickedButtons'][0]) == 0:
             return None
-        print(f'game\\route: data[\'clickedButtons\'] = {data['clickedButtons']}')
+        print(f"game\\route: data[\'clickedButtons\'] = {data['clickedButtons']}")
         # team_name = session['team_name']
         user_id = session['user_id']
         question_number = current_app.config['number_question']

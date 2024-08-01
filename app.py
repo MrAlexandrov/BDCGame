@@ -1,4 +1,4 @@
-# app.py
+import json
 import math
 import string
 import random
@@ -8,7 +8,7 @@ import os
 import asyncio
 
 from gevent.pywsgi import WSGIServer
-from flask import Flask, render_template, redirect, url_for, json, session
+from flask import Flask, render_template, redirect, url_for, session, current_app
 from flask_socketio import SocketIO, emit
 from flask_cors import CORS
 from access import login_required, group_required, external_required
@@ -24,7 +24,6 @@ import qrcode
 import socket
 from database.sql_provider import SQLProvider
 
-
 app = Flask(__name__)
 print(f'app = {app}')
 app.secret_key = 'SuperKey'
@@ -37,11 +36,36 @@ app.register_blueprint(blueprint_auth, url_prefix='/auth')
 app.register_blueprint(blueprint_admin, url_prefix='/admin')
 app.register_blueprint(blueprint_game, url_prefix='/game')
 
-app.config['db_config'] = json.load(open('configs/db_config.json'))
-app.config['access_config'] = json.load(open('configs/access.json'))
-app.config['cache_config'] = json.load(open('configs/cache.json'))
-app.config['report_url'] = json.load(open('configs/report_url.json'))
-app.config['report_list'] = json.load(open('configs/report_list.json', encoding='UTF-8'))
+# Загрузка конфигурационных файлов
+try:
+    with open('configs/db_config.json') as config_file:
+        config_content = config_file.read().strip()
+        if not config_content:
+            raise ValueError("db_config.json is empty")
+        app.config['db_config'] = json.loads(config_content)
+except Exception as e:
+    print(f"Error loading db_config.json: {e}")
+
+try:
+    with open('configs/access.json') as access_config_file:
+        config_content = access_config_file.read().strip()
+        if not config_content:
+            raise ValueError("access.json is empty")
+        app.config['access_config'] = json.loads(config_content)
+except Exception as e:
+    print(f"Error loading access.json: {e}")
+
+try:
+    with open('configs/cache.json') as cache_config_file:
+        config_content = cache_config_file.read().strip()
+        if not config_content:
+            raise ValueError("cache.json is empty")
+        app.config['cache_config'] = json.loads(config_content)
+except Exception as e:
+    print(f"Error loading cache.json: {e}")
+
+# app.config['report_url'] = json.load(open('configs/report_url.json'))
+# app.config['report_list'] = json.load(open('configs/report_list.json', encoding='UTF-8'))
 
 # Флаг, что игра не запущена
 app.config['work'] = False
@@ -70,21 +94,16 @@ app.config['break'] = {
 }
 
 app.config['results'] = question_data = {
-        "number": 0,
-        "question": "Результаты",
-        "image": "results.jpg",
-        "type": "info",
-        "variants": [],
-        "table": [
-            [("Команда 1", 10), ("Команда 2", 8), ("Команда 3", 6)],
-            ["Место", "Название команды", "Счет"]
-        ]
-    }
-
-
-# @app.before_request
-# def clear_session():
-#     session.modified = True
+    "number": 0,
+    "question": "Результаты",
+    "image": "results.jpg",
+    "type": "info",
+    "variants": [],
+    "table": [
+        [("Команда 1", 10), ("Команда 2", 8), ("Команда 3", 6)],
+        ["Место", "Название команды", "Счет"]
+    ]
+}
 
 # Получаем локальный ip для запуска приложения на localhost
 def get_local_ip():
@@ -98,7 +117,6 @@ def get_local_ip():
     except Exception as e:
         print("Error while getting local IP:", e)
         return None
-
 
 # Генерируем qr-код на основе локального адреса
 def generate_qr_code(data, filename):
@@ -114,7 +132,6 @@ def generate_qr_code(data, filename):
     img = qr.make_image(fill_color="black", back_color="white")
     img.save(filename)
 
-
 # Функция для создания qr-кода, по которому можно подключиться к игре
 # TODO: Добавить возможность создавать qr-код не только для локального хоста
 def make_qr():
@@ -128,9 +145,7 @@ def make_qr():
         print("app\\route: Failed to retrieve local IP address.")
         return None
 
-
 make_qr()
-
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
@@ -147,7 +162,6 @@ def index():
         #     return redirect(url_for('blueprint_gamer.game'))
     return redirect(url_for('blueprint_auth.start_auth'))
 
-
 @app.route('/exit')
 # @login_required
 def exit_func():
@@ -156,38 +170,30 @@ def exit_func():
         app.config['admin_logged_in'] = False
     return redirect(url_for('blueprint_auth.start_auth'))
 
-
-def get_exel():
+def get_excel():
     # Укажите путь к вашему файлу Excel
     path_to_project = sys.argv[0]
 
     index = path_to_project.rfind("\\")  # Находим индекс последнего слэша
 
-    # print(f'path_to_project[index + 1:] = {path_to_project[:index + 1]}')
     path_to_project = path_to_project[:index + 1]
-    excel_path = path_to_project + 'JackBox.xlsx'
-    # print(f'excel_path = {excel_path}')
+    excel_path = path_to_project + 'JackBox_piter.xlsx'
 
     # Прочтите данные из файла Excel
     df = pd.read_excel(excel_path)
 
     return df
 
-
-df = get_exel()
-
+df = get_excel()
 
 def get_question(index):
     print('app\\route: Admin get question')
     question = df.iloc[index][:3].to_dict()
     question['variants'] = df.iloc[index][3:].dropna().tolist()
-    # question['type'] = 'single'
-    # question['type'] = 'text'
     question['type'] = 'multi'
     question['lock'] = False
     question['answer'] = []
     return question
-
 
 @socketio.on('load_pack')
 def load_pack():
@@ -200,7 +206,6 @@ def load_pack():
             current_question['type'] = 'text'
             current_question['answer'].append(current_question['variants'])
             current_right_answers.append(current_question['variants'][0])
-            # current_question['variants'][0] = current_question['variants'][0][1:]
         else:
             for j in range(len(current_question['variants'])):
                 ans = current_question['variants'][j]
@@ -225,46 +230,12 @@ def load_pack():
     print('admin\\route:', '-' * 150)
     return questions
 
-
 app.config['number_question'] = 0
-
-########################################
-
-
-# @socketio.on('app_get_current_question')
-# def get_current_question():
-#     print(f'app\\route: app_get_current_question')
-#     return app.config['current_page']
-
-
-# @socketio.on('app_get_next_question')
-# def get_next_question():
-#     print(f'app\\route: app_get_next_question')
-#     app.config['number_question'] += 1
-#     app.config['question'] = get_question(app.config['number_question'])
-#     return app.config['question']
-
-# TODO: Сделать эту штуку
-# @socketio.on('startGame')
-# def start_game():
-#     print(f'app\\route: start_game')
-#     socketio.emit('start_game_admin')
-#     print(f'app\\route: after start_game_admin')
-#     emit('start_game_gamer')
-
 
 @app.errorhandler(404)
 def page_not_found(e):
     # Здесь можно возвращать специальную страницу для ошибки 404
     return redirect(url_for('blueprint_auth.start_auth'))
 
-
 if __name__ == '__main__':
-    # try:
-    # port = os.environ['PORT']
-    # print(f"port = {os.environ}")
-    # http_server = WSGIServer(('0.0.0.0', int(port)), app)
-    # http_server.serve_forever()
-    # except KeyError:
-    # socketio.run(app, debug=True, host='0.0.0.0')
     socketio.run(app, host='0.0.0.0', port=5000, debug=True)

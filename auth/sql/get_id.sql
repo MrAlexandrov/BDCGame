@@ -1,3 +1,3 @@
-select user_id
-from jackbox.external_user
-where team_name='$team_name'
+SELECT user_id
+FROM external_user
+WHERE login = '$login';

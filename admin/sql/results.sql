@@ -1,3 +1,3 @@
 SELECT team_name, score
-FROM jackbox.external_user
+FROM external_user
 ORDER BY score DESC;

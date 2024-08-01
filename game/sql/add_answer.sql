@@ -1,2 +1,2 @@
-insert into jackbox.answers (user_id, question_number, answer)
-values ('$user_id', '$question_number', '$answer')
+INSERT INTO answers (user_id, question_number, answer)
+VALUES ('$user_id', '$question_number', '$answer');

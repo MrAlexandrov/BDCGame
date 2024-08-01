@@ -1,16 +1,16 @@
-import os
-
-from string import Template
-
+import psycopg2
+import json
 
 class SQLProvider:
+    def __init__(self, config_path):
+        with open(config_path) as config_file:
+            self.config = json.load(config_file)
 
-    def __init__(self, file_path: str):
-        self._scripts = {}
-        for file in os.listdir(file_path):
-            self._scripts[file] = Template(open(f'{file_path}/{file}').read())
-
-    def get(self, name: str, **kwargs) -> str:
-        if name not in self._scripts:
-            raise ValueError(f'No such file {name}')
-        return self._scripts[name].substitute(**kwargs)
+    def get_connection(self):
+        return psycopg2.connect(
+            dbname=self.config['database'],
+            user=self.config['user'],
+            password=self.config['password'],
+            host=self.config['host'],
+            port=self.config['port']
+        )
