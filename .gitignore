@@ -2,3 +2,8 @@
 .env
 __pycache__
 
+*.xlsx
+!Pack_example.xlsx
+
+static/images
+!static/images/screen_question.jpg
