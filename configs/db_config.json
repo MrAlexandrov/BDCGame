@@ -1,7 +1,7 @@
 {
-  "user": "root",
-  "password": "root",
-  "host": "127.0.0.1",
-  "port": 5432,
-  "database": "jackbox"
+  "user": "$DB_USER",
+  "password": "$DB_PASSWORD",
+  "host": "$DB_HOST",
+  "port": "$DB_PORT",
+  "database": "$DB_NAME"
 }
