@@ -91,7 +91,8 @@ def register_admin_socketio_handlers(socketio):
     def handle_results_admin():
         print('admin\\route: results admin')
         sql_results = provider.get('results.sql')
-        results_info = select(current_app.config['db_config'], sql_results)
+        # results_info = select(current_app.config['db_config'], sql_results)
+        results_info = select(sql_results)
         print(f'results_info: {results_info}')
         current_app.config['results']['table'][0] = results_info[0]
         current_app.config['current_page'] = current_app.config['results']

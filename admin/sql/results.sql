@@ -1,3 +1,3 @@
-SELECT team_name, score
+SELECT login, score
 FROM external_user
 ORDER BY score DESC;

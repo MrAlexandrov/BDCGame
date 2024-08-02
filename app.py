@@ -208,7 +208,7 @@ def load_pack():
             current_right_answers.append(current_question['variants'][0])
         else:
             for j in range(len(current_question['variants'])):
-                ans = current_question['variants'][j]
+                ans = str(current_question['variants'][j])
                 if ans[0] == '!':
                     current_question['variants'][j] = ans[1:]
                     current_right_answers.append(current_question['variants'][j])
